@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
@@ -137,33 +138,53 @@ class CoinGeckoMarketDataProvider(IMarketDataProvider):
         *,
         cancellation_token: object | None = None,
     ) -> list[Candle]:
-        """Return candles using CoinGecko's OHLC endpoint."""
+        """Return candles using CoinGecko's market-chart endpoint."""
         del cancellation_token
         coin_id = self._normalise_symbol(symbol)
         days = self._resolve_days(timeframe, limit)
+        interval = self._resolve_interval(timeframe)
         payload = await self._get_json(
-            f"/coins/{coin_id}/ohlc",
+            f"/coins/{coin_id}/market_chart",
             vs_currency="usd",
             days=str(days),
+            interval=interval,
         )
-        entries = cast(Sequence[object], payload)
+        payload_map = cast(dict[str, object], payload)
+        prices = cast(Sequence[object], payload_map.get("prices", []))
+        volumes = cast(Sequence[object], payload_map.get("total_volumes", []))
 
         candles: list[Candle] = []
-        for entry in entries:
-            if not isinstance(entry, Sequence) or len(entry) < 5:
+        previous_close = Decimal("0")
+        for idx, entry in enumerate(prices):
+            if not isinstance(entry, Sequence) or len(entry) < 2:
                 continue
-            timestamp_ms, open_value, high_value, low_value, close_value = entry
+            timestamp_ms, price_value = entry
+            price = self._parse_decimal(price_value, "price")
+
+            if idx == 0:
+                previous_close = price
+            open_value = previous_close
+            close_value = price
+            high_value = max(open_value, close_value)
+            low_value = min(open_value, close_value)
+            volume_value = Decimal("0")
+            if idx < len(volumes):
+                volume_entry = cast(Sequence[object], volumes[idx])
+                if len(volume_entry) >= 2:
+                    volume_value = self._parse_decimal(volume_entry[1], "volume")
+
             candles.append(
                 Candle(
                     symbol=coin_id.upper(),
                     timestamp=self._timestamp_from_ms(timestamp_ms),
-                    open=self._parse_decimal(open_value, "open"),
-                    high=self._parse_decimal(high_value, "high"),
-                    low=self._parse_decimal(low_value, "low"),
-                    close=self._parse_decimal(close_value, "close"),
-                    volume=Decimal("0"),
+                    open=open_value,
+                    high=high_value,
+                    low=low_value,
+                    close=close_value,
+                    volume=volume_value,
                 )
             )
+            previous_close = close_value
 
         return candles[-limit:] if limit and candles else candles
 
@@ -230,22 +251,47 @@ class CoinGeckoMarketDataProvider(IMarketDataProvider):
         return candles
 
     @staticmethod
-    def _resolve_days(timeframe: str, limit: int) -> int:
-        """Translate timeframe and limit into a compatible CoinGecko day range."""
+    def _resolve_interval(timeframe: str) -> str:
+        """Map the requested timeframe to a CoinGecko chart interval."""
         mapping = {
-            "1m": 1,
-            "5m": 2,
-            "15m": 3,
-            "1h": max(1, min(limit, 90)),
-            "4h": max(1, min(limit // 4, 90)),
-            "1d": max(1, min(limit, 365)),
-            "1w": max(1, min(limit // 7, 365)),
-            "1M": max(1, min(limit, 3650)),
+            "1m": "minutely",
+            "5m": "5m",
+            "15m": "15m",
+            "1h": "hourly",
+            "4h": "4h",
+            "1d": "daily",
+            "1w": "daily",
+            "1M": "daily",
         }
-        value = mapping.get(timeframe.lower(), max(1, min(limit, 90)))
-        if value <= 0:
-            return 1
-        return value
+        return mapping.get(timeframe.strip(), "hourly")
+
+    @staticmethod
+    def _resolve_days(timeframe: str, limit: int) -> int:
+        """Translate a requested candle count into a stable CoinGecko day window."""
+        normalized = timeframe.strip()
+        timeframe_key = normalized.lower()
+
+        if timeframe_key in {"1m", "5m", "15m", "1h", "4h"}:
+            candles_per_day = {
+                "1m": 1440,
+                "5m": 288,
+                "15m": 96,
+                "1h": 24,
+                "4h": 6,
+            }
+            days_required = max(1, math.ceil(limit / candles_per_day[timeframe_key]))
+            return min(days_required, 90)
+
+        if timeframe_key == "1d":
+            return max(1, min(limit, 90))
+
+        if timeframe_key == "1w":
+            return max(1, min(math.ceil(limit / 7), 90))
+
+        if normalized == "1M" or timeframe_key in {"1mth", "1month", "1mo"}:
+            return max(1, min(limit, 3650))
+
+        return max(1, min(limit, 90))
 
 
 CoinMarketDataProvider = CoinGeckoMarketDataProvider

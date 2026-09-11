@@ -77,3 +77,12 @@ def test_coin_gecko_provider_normalizes_symbols() -> None:
 
     assert provider._normalise_symbol("btc-usd") == "bitcoin"
     assert provider._normalise_symbol("eth") == "ethereum"
+
+
+def test_coin_gecko_provider_resolves_valid_days_for_timeframe() -> None:
+    provider = CoinGeckoMarketDataProvider()
+
+    assert provider._resolve_days("1h", 24) == 1
+    assert provider._resolve_days("1h", 200) == 9
+    assert provider._resolve_days("4h", 50) == 9
+    assert provider._resolve_days("1d", 30) == 30
