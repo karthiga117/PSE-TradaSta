@@ -19,7 +19,8 @@ TradaSta AI is a Python FastAPI backend foundation for a future-ready trading in
 - Strategy registry with deterministic sample strategies and trend classification
 - Risk-management gate that evaluates stop loss, take profit, exposure, and drawdown constraints
 - Trading Signal Engine that returns deterministic BUY/SELL/HOLD decisions with confidence, risk/reward, and explainable reasoning
-- Thin FastAPI routes for price/OHLCV, technical analysis, risk evaluation, and signal generation
+- Phase 7 knowledge-base layer with chunking, deterministic embeddings, vector search, metadata filtering, and RAG context assembly
+- Thin FastAPI routes for price/OHLCV, technical analysis, risk evaluation, signal generation, and knowledge retrieval
 
 ## Project structure
 
@@ -119,6 +120,9 @@ The app listens on `http://localhost:8000` by default.
 - `GET /api/v1/analysis/{symbol}` - deterministic technical-analysis output with indicators and strategy observations
 - `POST /api/v1/risk/evaluate` - deterministic risk gate that approves or rejects proposed trades using configured portfolio, position-size, and drawdown limits
 - `POST /api/v1/signals` - trading signal engine that combines market data, technical analysis, strategy direction, and risk validation into BUY/SELL/HOLD output
+- `POST /api/v1/knowledge/search` - semantic retrieval over the local trading knowledge base without invoking an LLM
+- `POST /api/v1/knowledge/ingest` - ingest markdown/text knowledge documents into the local vector store
+- `GET /api/v1/knowledge/context` - assemble a bounded retrieval context for future LLM orchestration
 - `GET /docs` - interactive OpenAPI docs
 
 ## Example request

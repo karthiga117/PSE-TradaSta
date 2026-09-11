@@ -1,7 +1,12 @@
 """Dependency injection primitives for application services."""
 
 from collections.abc import Iterator
+from functools import lru_cache
 
+from app.application.knowledge.embedding import DeterministicEmbeddingProvider
+from app.application.knowledge.ingestion import KnowledgeIngestionService
+from app.application.knowledge.retriever import KnowledgeRetriever
+from app.application.knowledge.vector_store import InMemoryVectorStore
 from app.application.market_data_service import MarketDataService
 from app.application.risk_management.service import RiskManagementService
 from app.application.signal_engine import SignalEngine
@@ -57,4 +62,32 @@ def signal_engine_dependency() -> SignalEngine:
         strategy_registry=build_default_registry(),
         risk_service=risk_service,
         settings=settings,
+    )
+
+
+@lru_cache
+def knowledge_store_dependency() -> InMemoryVectorStore:
+    """Provide a long-lived in-memory vector store for the local knowledge base."""
+    return InMemoryVectorStore()
+
+
+def knowledge_ingestion_service_dependency() -> KnowledgeIngestionService:
+    """Create a configured knowledge ingestion service."""
+    settings = get_settings()
+    return KnowledgeIngestionService(
+        knowledge_store_dependency(),
+        DeterministicEmbeddingProvider(),
+        chunk_size=settings.knowledge_chunk_size,
+        chunk_overlap=settings.knowledge_chunk_overlap,
+    )
+
+
+def knowledge_retriever_dependency() -> KnowledgeRetriever:
+    """Create a configured knowledge retriever."""
+    settings = get_settings()
+    return KnowledgeRetriever(
+        knowledge_store_dependency(),
+        DeterministicEmbeddingProvider(),
+        default_top_k=settings.knowledge_max_top_k,
+        default_min_score=settings.knowledge_min_score,
     )

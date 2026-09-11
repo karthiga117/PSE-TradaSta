@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.analysis import router as analysis_router
+from app.api.v1.knowledge import router as knowledge_router
 from app.api.v1.market_data import router as market_data_router
 from app.api.v1.risk import router as risk_router
 from app.api.v1.signals import router as signals_router
@@ -14,3 +15,4 @@ router.include_router(market_data_router)
 router.include_router(analysis_router)
 router.include_router(risk_router)
 router.include_router(signals_router)
+router.include_router(knowledge_router)

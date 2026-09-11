@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     market_data_provider: str = "coingecko"
     market_data_base_url: str = "https://api.coingecko.com/api/v3"
     market_data_timeout_seconds: float = 10.0
+    knowledge_chunk_size: int = 600
+    knowledge_chunk_overlap: int = 80
+    knowledge_max_top_k: int = 10
+    knowledge_min_score: float = 0.0
+    knowledge_dataset_directory: str = "app/data/knowledge"
     risk_per_trade_percent: Decimal = Decimal("0.01")
     max_risk_per_trade: Decimal | None = None
     max_position_size: Decimal = Decimal("1000000")
