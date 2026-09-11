@@ -16,7 +16,7 @@ async def health(
 ) -> dict[str, str]:
     """Return lightweight service health without external dependency checks."""
     return {
-        "status": "I am healthy",
+        "status": "healthy",
         "service": settings.app_name,
         "version": settings.app_version,
     }
