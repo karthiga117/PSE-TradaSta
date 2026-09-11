@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     max_open_positions: int = 5
     stop_loss_required: bool = True
     take_profit_required: bool = True
+    default_strategy: str = "moving_average_trend"
+    min_signal_confidence: Decimal = Decimal("0.60")
+    atr_stop_multiplier: Decimal = Decimal("2.0")
+    target_risk_reward: Decimal = Decimal("2.0")
 
     model_config = SettingsConfigDict(
         env_file=".env",

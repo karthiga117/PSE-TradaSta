@@ -411,6 +411,7 @@ Combine market data, indicators, strategies, and risk rules to produce explainab
 - Deterministic signal generation wherever possible
 - Consistent explanation models
 - Clear audit trail for each signal
+- Mandatory risk gate before any BUY/SELL output
 
 ### Deliverables
 - Signal generation service
@@ -421,11 +422,15 @@ Combine market data, indicators, strategies, and risk rules to produce explainab
 - Signals are generated from verified inputs
 - Risk checks are applied before signal approval
 - Signals include explainable reasoning and metadata
+- HOLD is returned when risk validation fails or confidence is insufficient
 
 ### Testing requirements
 - Signal generation tests
 - Risk gating tests
 - Confidence and metadata validation tests
+
+### Status
+Phase 6 is implemented in the backend as a deterministic orchestration layer that reuses the existing market-data, technical-analysis, strategy, and risk services through the `/api/v1/signals` endpoint.
 
 ---
 

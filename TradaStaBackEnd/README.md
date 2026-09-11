@@ -1,6 +1,6 @@
 ﻿# TradaSta AI Backend
 
-TradaSta AI is a Python FastAPI backend foundation for a future-ready trading intelligence platform. The repository now includes the Phase 1 foundation and the Phase 4 deterministic technical-analysis layer, with provider-neutral market-data and analysis abstractions layered in cleanly.
+TradaSta AI is a Python FastAPI backend foundation for a future-ready trading intelligence platform. The repository now includes the Phase 1 foundation, the deterministic technical-analysis layer, the risk-management guardrail, and the Phase 6 trading-signal engine that orchestrates market data, strategy evaluation, and risk gating into explainable BUY/SELL/HOLD outputs.
 
 ## Technology stack
 
@@ -17,7 +17,9 @@ TradaSta AI is a Python FastAPI backend foundation for a future-ready trading in
 - Provider-independent market-data abstractions and a CoinGecko adapter
 - Deterministic technical-analysis engine for SMA, EMA, RSI, MACD, Bollinger Bands, ATR, and volume analysis
 - Strategy registry with deterministic sample strategies and trend classification
-- Thin FastAPI routes for price/OHLCV and technical-analysis access
+- Risk-management gate that evaluates stop loss, take profit, exposure, and drawdown constraints
+- Trading Signal Engine that returns deterministic BUY/SELL/HOLD decisions with confidence, risk/reward, and explainable reasoning
+- Thin FastAPI routes for price/OHLCV, technical analysis, risk evaluation, and signal generation
 
 ## Project structure
 
@@ -116,6 +118,7 @@ The app listens on `http://localhost:8000` by default.
 - `GET /api/v1/market-data/{symbol}/ohlcv` - normalized OHLCV candles for a symbol and timeframe
 - `GET /api/v1/analysis/{symbol}` - deterministic technical-analysis output with indicators and strategy observations
 - `POST /api/v1/risk/evaluate` - deterministic risk gate that approves or rejects proposed trades using configured portfolio, position-size, and drawdown limits
+- `POST /api/v1/signals` - trading signal engine that combines market data, technical analysis, strategy direction, and risk validation into BUY/SELL/HOLD output
 - `GET /docs` - interactive OpenAPI docs
 
 ## Example request
@@ -129,6 +132,26 @@ The response includes:
 - `trend` classification
 - indicator values for SMA, EMA, RSI, MACD, Bollinger Bands, ATR, and volume analysis
 - strategy observations generated from the deterministic strategy registry
+
+### Signal generation example
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/signals" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "strategy": "moving_average_trend",
+    "account_equity": "10000",
+    "current_exposure": "2000",
+    "daily_loss": "100",
+    "peak_equity": "10000",
+    "current_equity": "9800",
+    "open_positions": 2
+  }'
+```
+
+The API returns a deterministic signal in the form `BUY`, `SELL`, or `HOLD`, with confidence, risk/reward, and a human-readable explanation. Risk validation remains mandatory before any BUY or SELL outcome is published.
 
 ## Run tests
 
