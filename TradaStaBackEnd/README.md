@@ -111,6 +111,21 @@ uvicorn app.main:app --reload
 
 The app listens on `http://localhost:8000` by default.
 
+## Documentation
+
+The project documentation set includes:
+
+- `docs/ARCHITECTURE.md` - high-level system design and boundaries
+- `docs/API_DESIGN.md` - request/response contract and endpoint conventions
+- `docs/DATABASE_DESIGN.md` - persistence and storage strategy
+- `docs/SECURITY.md` - risk model and security controls
+- `docs/RAG_ARCHITECTURE.md` - retrieval and context assembly design
+- `docs/AI_ARCHITECTURE.md` - AI integration guardrails and architecture
+- `docs/DEPLOYMENT.md` - environment and release strategy
+- `docs/OBSERVABILITY.md` - monitoring and operational telemetry
+- `docs/TESTING.md` - validation approach and release gates
+- `docs/ADR/README.md` - architecture decision records
+
 ## API endpoints
 
 - `GET /` - service status
