@@ -1,0 +1,130 @@
+<section class="dashboard" aria-live="polite">
+  <header class="dashboard__header">
+    <div>
+      <p class="eyebrow">TradaSta AI</p>
+      <h1>Dashboard</h1>
+    </div>
+
+    <div class="toolbar" role="group" aria-label="Dashboard controls">
+      <label class="field">
+        <span>Asset</span>
+        <input [formControl]="symbolControl" type="text" aria-label="Asset symbol" placeholder="BTC" />
+      </label>
+
+      <label class="field">
+        <span>Timeframe</span>
+        <select [formControl]="timeframeControl" aria-label="Timeframe selection">
+          <option value="1h">1h</option>
+          <option value="4h">4h</option>
+          <option value="1d">1d</option>
+        </select>
+      </label>
+
+      <button type="button" class="primary-button" (click)="refresh()" [disabled]="isLoading()">
+        {{ isLoading() ? 'Loading...' : 'Refresh' }}
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="errorMessage() as error" class="message message--error" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="isLoading() && !state().signal" class="message message--info">
+    Loading market data and strategy context...
+  </div>
+
+  <div *ngIf="state().signal || state().risk || state().analysis || state().price; else emptyState" class="content-grid">
+    <article class="panel panel--wide">
+      <h2>Market overview</h2>
+
+      <div class="price-row" *ngIf="state().price as price">
+        <div>
+          <span class="label">Current Price</span>
+          <strong>${{ price.price }}</strong>
+        </div>
+        <div>
+          <span class="label">Symbol</span>
+          <strong>{{ price.symbol }}</strong>
+        </div>
+        <div>
+          <span class="label">Timeframe</span>
+          <strong>{{ timeframeControl.value }}</strong>
+        </div>
+      </div>
+
+      <div class="chart-placeholder" *ngIf="state().ohlcv as ohlcv">
+        <span>OHLCV candles loaded: {{ ohlcv.candles.length }}</span>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Technical Analysis</h2>
+
+      <div *ngIf="state().analysis as analysis" class="metrics">
+        <div><span>Trend</span><strong>{{ analysis.trend }}</strong></div>
+        <div *ngIf="analysis.indicators.rsi as rsi"><span>RSI</span><strong>{{ rsi.value }}</strong></div>
+        <div *ngIf="analysis.indicators.ema as ema"><span>EMA</span><strong>{{ ema.value }}</strong></div>
+        <div *ngIf="analysis.indicators.macd as macd"><span>MACD</span><strong>{{ macd.macd }}</strong></div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Trading Signal</h2>
+
+      <div *ngIf="state().signal as signal" class="signal-card">
+        <div class="signal-badge" [ngClass]="signal.signal.toLowerCase()">{{ signal.signal }}</div>
+        <div class="metric-line"><span>Confidence</span><strong>{{ signal.confidence }}%</strong></div>
+        <div class="metric-line"><span>Strategy</span><strong>{{ signal.strategy }}</strong></div>
+        <div class="metric-line"><span>Entry</span><strong>{{ signal.entry ?? 'n/a' }}</strong></div>
+        <div class="metric-line"><span>Stop Loss</span><strong>{{ signal.stop_loss ?? 'n/a' }}</strong></div>
+        <div class="metric-line"><span>Take Profit</span><strong>{{ signal.take_profit ?? 'n/a' }}</strong></div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Risk</h2>
+
+      <div *ngIf="state().risk as risk" class="metrics">
+        <div><span>Status</span><strong>{{ risk.approved ? 'Approved' : 'Rejected' }}</strong></div>
+        <div><span>Reason</span><strong>{{ risk.reason_code }}</strong></div>
+        <div><span>Risk Reward</span><strong>{{ risk.risk_reward_ratio ?? 'n/a' }}</strong></div>
+        <div><span>Position Size</span><strong>{{ risk.position_size ?? 'n/a' }}</strong></div>
+      </div>
+    </article>
+
+    <article class="panel panel--wide">
+      <h2>AI Explanation</h2>
+
+      <div *ngIf="state().explanation as explanation" class="explanation">
+        <p>{{ explanation.explanation }}</p>
+
+        <ul class="bullet-list">
+          <li *ngFor="let factor of explanation.keyFactors">{{ factor }}</li>
+        </ul>
+      </div>
+    </article>
+
+    <article class="panel panel--wide">
+      <h2>Knowledge Sources</h2>
+
+      <div *ngIf="state().knowledge?.results?.length; else noKnowledge" class="knowledge-list">
+        <article *ngFor="let result of state().knowledge?.results ?? []" class="knowledge-item">
+          <h3>{{ result.title }}</h3>
+          <p class="source-line">{{ result.source }} · score {{ result.score.toFixed(3) }}</p>
+          <p>{{ result.content }}</p>
+        </article>
+      </div>
+    </article>
+  </div>
+
+  <ng-template #emptyState>
+    <div class="message message--info">
+      Select a symbol and load the dashboard to view market, technical, risk, and knowledge data.
+    </div>
+  </ng-template>
+
+  <ng-template #noKnowledge>
+    <div class="message message--info">No knowledge documents were returned for this query.</div>
+  </ng-template>
+</section>
