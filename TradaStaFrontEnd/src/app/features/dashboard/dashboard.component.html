@@ -1,130 +1,294 @@
-<section class="dashboard" aria-live="polite">
-  <header class="dashboard__header">
-    <div>
-      <p class="eyebrow">TradaSta AI</p>
-      <h1>Dashboard</h1>
+<section class="dashboard-shell" aria-live="polite">
+  <aside class="sidebar">
+    <div class="brand-section">
+      <div class="brand-mark" aria-hidden="true">
+        <span class="brand-mark__bar brand-mark__bar--short"></span>
+        <span class="brand-mark__bar brand-mark__bar--tall"></span>
+        <span class="brand-mark__bar brand-mark__bar--mid"></span>
+      </div>
+      <div class="brand-copy">
+        <h2>TradaSta</h2>
+        <small>AI Trading Assistant</small>
+      </div>
     </div>
 
-    <div class="toolbar" role="group" aria-label="Dashboard controls">
-      <label class="field">
-        <span>Asset</span>
-        <input [formControl]="symbolControl" type="text" aria-label="Asset symbol" placeholder="BTC" />
-      </label>
+    <nav class="sidebar-nav" aria-label="Sidebar navigation">
+      <button class="nav-item active" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13.5h6V20H4v-6.5zm10-9.5h6V20h-6V4zm-10 0h6v6.5H4V4zm10 9.5h6v6.5h-6v-6.5z"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16M7 15V9m5 6V6m5 9v-4"/></svg>
+        <span>Market Data</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18V8m7 10V4m7 14v-8"/></svg>
+        <span>Technical Analysis</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18h14M7 15l3-5 3 3 5-8"/></svg>
+        <span>Trading Signals</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-2.9 8.6-7 10-4.1-1.4-7-5.5-7-10V7l7-4zm-1 7h2v6h-2zm0 7h2v2h-2z"/></svg>
+        <span>Risk Management</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14c1.5-3 3.2-4.5 5.5-4.5S17 11.5 18 14v4H6v-3.5zm1.5-8h9l1.5 2.5H6l1.5-2.5z"/></svg>
+        <span>AI Explanation</span>
+      </button>
+      <button class="nav-item" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5A2.5 2.5 0 0 1 7.5 6h9A2.5 2.5 0 0 1 19 8.5v7A2.5 2.5 0 0 1 16.5 18h-9A2.5 2.5 0 0 1 5 15.5v-7zm2 1.5h10M8 12h8M8 15h5"/></svg>
+        <span>Knowledge Base</span>
+      </button>
+    </nav>
 
-      <label class="field">
-        <span>Timeframe</span>
-        <select [formControl]="timeframeControl" aria-label="Timeframe selection">
+    <div class="sidebar-cta">
+      <div class="cta-badge">Trade Smarter</div>
+      <p>With AI Insights</p>
+      <small>Data • Analysis • Risk • Knowledge • Clarity</small>
+    </div>
+  </aside>
+
+  <main class="main-panel">
+    <header class="top-header">
+      <div class="control-group">
+        <div class="asset-select" role="group" aria-label="Asset selector">
+          <span class="coin-icon">₿</span>
+          <input [formControl]="symbolControl" aria-label="Asset symbol" type="text" value="BTCUSDT" />
+        </div>
+
+        <select class="timeframe-select" [formControl]="timeframeControl" aria-label="Timeframe selection">
+          <option value="15m">15m</option>
           <option value="1h">1h</option>
           <option value="4h">4h</option>
           <option value="1d">1d</option>
         </select>
-      </label>
 
-      <button type="button" class="primary-button" (click)="refresh()" [disabled]="isLoading()">
-        {{ isLoading() ? 'Loading...' : 'Refresh' }}
+        <button type="button" class="analyze-button" (click)="refresh()" [disabled]="isLoading()">
+          {{ isLoading() ? 'Loading...' : 'Analyze' }}
+        </button>
+      </div>
+
+      <div class="header-meta">
+        <span class="connection-pill"><span class="status-dot"></span> Backed Connected</span>
+        <div class="profile-pill">
+          <span class="profile-avatar">K</span>
+          <span>Karthiga</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-header">
+      <div>
+        <h1>Dashboard</h1>
+        <p>Markets insights, trading signals and AI-powered analysis</p>
+      </div>
+      <button type="button" class="refresh-button" (click)="refresh()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0 2.2 5.6M20 4v7h-7"/></svg>
+        Refresh
       </button>
     </div>
-  </header>
 
-  <div *ngIf="errorMessage() as error" class="message message--error" role="alert">
-    {{ error }}
-  </div>
-
-  <div *ngIf="isLoading() && !state().signal" class="message message--info">
-    Loading market data and strategy context...
-  </div>
-
-  <div *ngIf="state().signal || state().risk || state().analysis || state().price; else emptyState" class="content-grid">
-    <article class="panel panel--wide">
-      <h2>Market overview</h2>
-
-      <div class="price-row" *ngIf="state().price as price">
-        <div>
-          <span class="label">Current Price</span>
-          <strong>${{ price.price }}</strong>
+    <div class="summary-grid">
+      <article class="summary-card">
+        <div class="card-header">
+          <span class="card-icon card-icon--price">₿</span>
+          <span>Current Price</span>
         </div>
-        <div>
-          <span class="label">Symbol</span>
-          <strong>{{ price.symbol }}</strong>
+        <div class="card-value">${{ (state().price?.price ?? '65,432.10') }}</div>
+        <div class="card-trend positive">+2.34% (24h)</div>
+      </article>
+
+      <article class="summary-card">
+        <div class="card-header">
+          <span class="card-icon card-icon--signal">↗</span>
+          <span>Trading Signal</span>
         </div>
-        <div>
-          <span class="label">Timeframe</span>
-          <strong>{{ timeframeControl.value }}</strong>
+        <div class="card-signal {{ (state().signal?.signal ?? 'BUY').toLowerCase() }}">{{ state().signal?.signal ?? 'BUY' }}</div>
+        <div class="card-meta">Confidence: {{ state().signal?.confidence ?? '82%' }}</div>
+      </article>
+
+      <article class="summary-card">
+        <div class="card-header">
+          <span class="card-icon card-icon--risk">R</span>
+          <span>Risk / Reward</span>
         </div>
-      </div>
+        <div class="card-value small">{{ state().risk?.risk_reward_ratio ?? '2.0' }}</div>
+        <div class="card-meta">1 : {{ state().risk?.risk_reward_ratio ?? '2.0' }}</div>
+      </article>
 
-      <div class="chart-placeholder" *ngIf="state().ohlcv as ohlcv">
-        <span>OHLCV candles loaded: {{ ohlcv.candles.length }}</span>
-      </div>
-    </article>
-
-    <article class="panel">
-      <h2>Technical Analysis</h2>
-
-      <div *ngIf="state().analysis as analysis" class="metrics">
-        <div><span>Trend</span><strong>{{ analysis.trend }}</strong></div>
-        <div *ngIf="analysis.indicators.rsi as rsi"><span>RSI</span><strong>{{ rsi.value }}</strong></div>
-        <div *ngIf="analysis.indicators.ema as ema"><span>EMA</span><strong>{{ ema.value }}</strong></div>
-        <div *ngIf="analysis.indicators.macd as macd"><span>MACD</span><strong>{{ macd.macd }}</strong></div>
-      </div>
-    </article>
-
-    <article class="panel">
-      <h2>Trading Signal</h2>
-
-      <div *ngIf="state().signal as signal" class="signal-card">
-        <div class="signal-badge" [ngClass]="signal.signal.toLowerCase()">{{ signal.signal }}</div>
-        <div class="metric-line"><span>Confidence</span><strong>{{ signal.confidence }}%</strong></div>
-        <div class="metric-line"><span>Strategy</span><strong>{{ signal.strategy }}</strong></div>
-        <div class="metric-line"><span>Entry</span><strong>{{ signal.entry ?? 'n/a' }}</strong></div>
-        <div class="metric-line"><span>Stop Loss</span><strong>{{ signal.stop_loss ?? 'n/a' }}</strong></div>
-        <div class="metric-line"><span>Take Profit</span><strong>{{ signal.take_profit ?? 'n/a' }}</strong></div>
-      </div>
-    </article>
-
-    <article class="panel">
-      <h2>Risk</h2>
-
-      <div *ngIf="state().risk as risk" class="metrics">
-        <div><span>Status</span><strong>{{ risk.approved ? 'Approved' : 'Rejected' }}</strong></div>
-        <div><span>Reason</span><strong>{{ risk.reason_code }}</strong></div>
-        <div><span>Risk Reward</span><strong>{{ risk.risk_reward_ratio ?? 'n/a' }}</strong></div>
-        <div><span>Position Size</span><strong>{{ risk.position_size ?? 'n/a' }}</strong></div>
-      </div>
-    </article>
-
-    <article class="panel panel--wide">
-      <h2>AI Explanation</h2>
-
-      <div *ngIf="state().explanation as explanation" class="explanation">
-        <p>{{ explanation.explanation }}</p>
-
-        <ul class="bullet-list">
-          <li *ngFor="let factor of explanation.keyFactors">{{ factor }}</li>
-        </ul>
-      </div>
-    </article>
-
-    <article class="panel panel--wide">
-      <h2>Knowledge Sources</h2>
-
-      <div *ngIf="state().knowledge?.results?.length; else noKnowledge" class="knowledge-list">
-        <article *ngFor="let result of state().knowledge?.results ?? []" class="knowledge-item">
-          <h3>{{ result.title }}</h3>
-          <p class="source-line">{{ result.source }} · score {{ result.score.toFixed(3) }}</p>
-          <p>{{ result.content }}</p>
-        </article>
-      </div>
-    </article>
-  </div>
-
-  <ng-template #emptyState>
-    <div class="message message--info">
-      Select a symbol and load the dashboard to view market, technical, risk, and knowledge data.
+      <article class="summary-card">
+        <div class="card-header">
+          <span class="card-icon card-icon--trend">↗</span>
+          <span>Market Trend</span>
+        </div>
+        <div class="card-value small">Uptrend</div>
+        <div class="card-meta">Bullish momentum</div>
+      </article>
     </div>
-  </ng-template>
 
-  <ng-template #noKnowledge>
-    <div class="message message--info">No knowledge documents were returned for this query.</div>
-  </ng-template>
+    <article class="chart-card">
+      <div class="chart-header">
+        <span class="chart-title">BTCUSDT Price Chart</span>
+        <div class="time-range">
+          <button class="time-chip active" type="button">15m</button>
+          <button class="time-chip" type="button">1h</button>
+          <button class="time-chip" type="button">4h</button>
+          <button class="time-chip" type="button">1d</button>
+          <button class="time-chip" type="button">1w</button>
+        </div>
+      </div>
+
+      <svg class="chart-svg" viewBox="0 0 760 260" preserveAspectRatio="none" aria-label="BTC price chart">
+        <g stroke="#d7d0c7" stroke-width="1">
+          <line x1="0" y1="30" x2="760" y2="30"/>
+          <line x1="0" y1="80" x2="760" y2="80"/>
+          <line x1="0" y1="130" x2="760" y2="130"/>
+          <line x1="0" y1="180" x2="760" y2="180"/>
+          <line x1="0" y1="230" x2="760" y2="230"/>
+        </g>
+
+        <g fill="none" stroke="#d4b08d" stroke-width="2">
+          <line x1="80" y1="190" x2="80" y2="50"/>
+          <line x1="120" y1="200" x2="120" y2="90"/>
+          <line x1="160" y1="170" x2="160" y2="107"/>
+          <line x1="200" y1="150" x2="200" y2="88"/>
+          <line x1="240" y1="136" x2="240" y2="86"/>
+          <line x1="280" y1="146" x2="280" y2="92"/>
+          <line x1="320" y1="128" x2="320" y2="70"/>
+          <line x1="360" y1="186" x2="360" y2="122"/>
+          <line x1="400" y1="120" x2="400" y2="54"/>
+          <line x1="440" y1="168" x2="440" y2="101"/>
+          <line x1="480" y1="158" x2="480" y2="74"/>
+          <line x1="520" y1="124" x2="520" y2="62"/>
+          <line x1="560" y1="170" x2="560" y2="88"/>
+          <line x1="600" y1="140" x2="600" y2="75"/>
+          <line x1="640" y1="162" x2="640" y2="96"/>
+          <line x1="680" y1="118" x2="680" y2="70"/>
+          <line x1="720" y1="155" x2="720" y2="84"/>
+        </g>
+
+        <g>
+          <rect x="70" y="170" width="12" height="50" rx="2" fill="#d0b090"/>
+          <rect x="110" y="154" width="12" height="66" rx="2" fill="#e7b98f"/>
+          <rect x="150" y="142" width="12" height="78" rx="2" fill="#d0b090"/>
+          <rect x="190" y="135" width="12" height="85" rx="2" fill="#f0d3b4"/>
+          <rect x="230" y="126" width="12" height="94" rx="2" fill="#d0b090"/>
+          <rect x="270" y="146" width="12" height="74" rx="2" fill="#d5a47e"/>
+          <rect x="310" y="110" width="12" height="110" rx="2" fill="#d3bb9d"/>
+          <rect x="350" y="160" width="12" height="60" rx="2" fill="#d7a37b"/>
+          <rect x="390" y="110" width="12" height="110" rx="2" fill="#e0bf9a"/>
+          <rect x="430" y="143" width="12" height="77" rx="2" fill="#d9a77e"/>
+          <rect x="470" y="133" width="12" height="87" rx="2" fill="#e8c59d"/>
+          <rect x="510" y="118" width="12" height="102" rx="2" fill="#d6b395"/>
+          <rect x="550" y="146" width="12" height="74" rx="2" fill="#d99f66"/>
+          <rect x="590" y="120" width="12" height="100" rx="2" fill="#d9bf99"/>
+          <rect x="630" y="142" width="12" height="78" rx="2" fill="#d5ad7c"/>
+          <rect x="670" y="110" width="12" height="110" rx="2" fill="#d0b48c"/>
+          <rect x="710" y="140" width="12" height="80" rx="2" fill="#d89b63"/>
+        </g>
+
+        <g font-size="11" fill="#8d857d" font-family="Inter, sans-serif">
+          <text x="60" y="245">Sep 12</text>
+          <text x="320" y="245">06:00</text>
+          <text x="490" y="245">12:00</text>
+          <text x="650" y="245">18:00</text>
+        </g>
+
+        <g font-size="11" fill="#8d857d" font-family="Inter, sans-serif">
+          <text x="720" y="28">68,000</text>
+          <text x="720" y="84">66,000</text>
+          <text x="720" y="136">64,000</text>
+          <text x="720" y="188">62,000</text>
+        </g>
+      </svg>
+    </article>
+
+    <div class="bottom-grid">
+      <article class="data-panel">
+        <div class="panel-heading">
+          <span class="panel-badge">⏱</span>
+          <h3>Technical Indicators</h3>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Indicator</th>
+              <th>Value</th>
+              <th>Signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>RSI (14)</td><td>55.2</td><td class="neutral">Neutral</td></tr>
+            <tr><td>MACD</td><td>1.23</td><td class="bullish">Bullish</td></tr>
+            <tr><td>EMA (20)</td><td>64,850</td><td class="bullish">Bullish</td></tr>
+            <tr><td>EMA (50)</td><td>63,420</td><td class="bullish">Bullish</td></tr>
+            <tr><td>SMA (200)</td><td>58,210</td><td class="bullish">Bullish</td></tr>
+            <tr><td>ATR (14)</td><td>1,230</td><td class="muted">—</td></tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="data-panel">
+        <div class="panel-heading">
+          <span class="panel-badge">⚙</span>
+          <h3>Trade Parameters</h3>
+        </div>
+
+        <div class="parameter-layout">
+          <div class="parameter-row"><span>Entry Price</span><strong>$65,432.10</strong></div>
+          <div class="parameter-row"><span>Stop Loss</span><strong>$63,000.00</strong></div>
+          <div class="parameter-row"><span>Take Profit</span><strong>$69,000.00</strong></div>
+          <div class="parameter-row"><span>Risk / Reward</span><strong>2.0</strong></div>
+          <div class="parameter-row"><span>Position Size</span><strong>2.0% of portfolio</strong></div>
+          <div class="parameter-row"><span>Risk Amount</span><strong>$200.00</strong></div>
+        </div>
+      </article>
+
+      <article class="data-panel signal-panel">
+        <div class="panel-heading panel-heading--with-action">
+          <div class="panel-head-left">
+            <span class="panel-badge">✦</span>
+            <h3>Recent Signals</h3>
+          </div>
+          <button type="button" class="view-all">View All →</button>
+        </div>
+
+        <div class="signal-list">
+          <div class="signal-row">
+            <span class="signal-mark signal-mark--btc">₿</span>
+            <span class="signal-pair">BTCUSDT</span>
+            <span class="signal-kind buy">BUY</span>
+            <span class="signal-time">1h ago</span>
+          </div>
+          <div class="signal-row">
+            <span class="signal-mark signal-mark--eth">Ξ</span>
+            <span class="signal-pair">ETHUSDT</span>
+            <span class="signal-kind hold">HOLD</span>
+            <span class="signal-time">3h ago</span>
+          </div>
+          <div class="signal-row">
+            <span class="signal-mark signal-mark--sol">S</span>
+            <span class="signal-pair">SOLUSDT</span>
+            <span class="signal-kind sell">SELL</span>
+            <span class="signal-time">8h ago</span>
+          </div>
+          <div class="signal-row">
+            <span class="signal-mark signal-mark--bnb">B</span>
+            <span class="signal-pair">BNBUSDT</span>
+            <span class="signal-kind buy">BUY</span>
+            <span class="signal-time">12h ago</span>
+          </div>
+          <div class="signal-row">
+            <span class="signal-mark signal-mark--ada">A</span>
+            <span class="signal-pair">ADAUSDT</span>
+            <span class="signal-kind hold">HOLD</span>
+            <span class="signal-time">12h ago</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
 </section>

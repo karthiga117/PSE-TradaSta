@@ -24,7 +24,7 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should expose a backend-compatible default symbol', () => {
-    expect(component.symbolControl.value).toBe('BTC');
+  it('should expose the dashboard default symbol from the mockup', () => {
+    expect(component.symbolControl.value).toBe('BTCUSDT');
   });
 });

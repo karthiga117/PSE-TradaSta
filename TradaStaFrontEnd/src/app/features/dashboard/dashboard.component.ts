@@ -19,7 +19,7 @@ import { TradingSignalService } from '../../core/services/trading-signal.service
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
-  readonly symbolControl = new FormControl('BTC');
+  readonly symbolControl = new FormControl('BTCUSDT');
   readonly timeframeControl = new FormControl('1h');
 
   readonly state = signal<DashboardState>({
@@ -51,7 +51,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboard(): void {
-    const symbol = (this.symbolControl.value ?? 'BTC').trim();
+    const symbol = (this.symbolControl.value ?? 'BTCUSDT').trim();
     const timeframe = this.timeframeControl.value ?? '1h';
 
     this.isLoading.set(true);
