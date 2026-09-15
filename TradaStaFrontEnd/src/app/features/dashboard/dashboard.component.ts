@@ -2,9 +2,15 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { finalize, forkJoin, map, switchMap } from 'rxjs';
+import { catchError, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 
-import { DashboardState, HealthResponse, RiskEvaluationRequest } from '../../core/models/trading.models';
+import {
+  ContextRetrievalRequest,
+  ContextRetrievalResponse,
+  DashboardState,
+  HealthResponse,
+  RiskEvaluationRequest,
+} from '../../core/models/trading.models';
 import { ApiService } from '../../core/services/api.service';
 import { MarketDataService } from '../../core/services/market-data.service';
 import { RiskManagementService } from '../../core/services/risk-management.service';
@@ -199,14 +205,34 @@ export class DashboardComponent implements OnInit {
             open_positions: 2,
           };
 
+          const contextRequest: ContextRetrievalRequest = {
+            symbol,
+            timeframe,
+            trend: trend as 'BULLISH' | 'BEARISH' | 'NEUTRAL',
+            risk_profile: 'balanced',
+            intent: 'evaluate_trade',
+            query: `${symbol} ${trend.toLowerCase()} trading context and risk-adjusted market regime`,
+            limit: 3,
+          };
+
           return this.riskManagementService.evaluate(riskRequest).pipe(
-            map((risk) => ({ price, ohlcv, analysis, risk })),
+            switchMap((risk) =>
+              this.api
+                .post<ContextRetrievalRequest, ContextRetrievalResponse>(
+                  '/api/v1/context/retrieve',
+                  contextRequest,
+                )
+                .pipe(
+                  catchError(() => of(null)),
+                  map((knowledge) => ({ price, ohlcv, analysis, risk, knowledge })),
+                ),
+            ),
           );
         }),
         finalize(() => this.isLoading.set(false)),
       )
       .subscribe({
-        next: ({ price, ohlcv, analysis, risk }) => {
+        next: ({ price, ohlcv, analysis, risk, knowledge }) => {
           this.state.set({
             price,
             ohlcv,
@@ -214,7 +240,7 @@ export class DashboardComponent implements OnInit {
             signal: null,
             risk,
             explanation: null,
-            knowledge: null,
+            knowledge: knowledge ?? null,
           });
 
           this.recentSignals.set([

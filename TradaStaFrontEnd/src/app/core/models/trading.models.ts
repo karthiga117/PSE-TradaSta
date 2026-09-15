@@ -126,6 +126,37 @@ export interface SignalResponse {
   timestamp: string;
 }
 
+export interface ContextRetrievalRequest {
+  symbol: string;
+  timeframe: string;
+  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  risk_profile?: string;
+  intent?: string;
+  query?: string | null;
+  limit?: number;
+}
+
+export interface ContextRetrievalDocument {
+  id: string;
+  title: string;
+  category: string;
+  summary: string;
+  score: number;
+  source: string;
+  tags: string[];
+}
+
+export interface ContextRetrievalResponse {
+  symbol: string;
+  timeframe: string;
+  trend: string;
+  risk_profile: string;
+  intent: string;
+  query: string;
+  generated_at: string;
+  documents: ContextRetrievalDocument[];
+}
+
 export interface KnowledgeSearchResult {
   chunk_id: string;
   content: string;
@@ -171,5 +202,5 @@ export interface DashboardState {
   signal: SignalResponse | null;
   risk: RiskDecisionResponse | null;
   explanation: AiExplanationResponse | null;
-  knowledge: KnowledgeSearchResponse | null;
+  knowledge: ContextRetrievalResponse | null;
 }

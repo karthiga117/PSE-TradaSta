@@ -189,6 +189,31 @@
 
       <article class="data-panel">
         <div class="panel-heading">
+          <span class="panel-badge">🧠</span>
+          <h3>Context / Evidence</h3>
+        </div>
+
+        <div *ngIf="state().knowledge?.documents?.length; else noKnowledge" class="context-list">
+          <div class="context-item" *ngFor="let document of state().knowledge!.documents">
+            <div class="context-head">
+              <span class="context-tag">{{ document.category }}</span>
+              <strong>{{ document.title }}</strong>
+              <span class="context-score">{{ document.score.toFixed(2) }}</span>
+            </div>
+            <p>{{ document.summary }}</p>
+            <div class="context-tags" *ngIf="document.tags?.length">
+              <span *ngFor="let tag of document.tags">{{ tag }}</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noKnowledge>
+          <div class="empty-state">Retrieval context is loading...</div>
+        </ng-template>
+      </article>
+
+      <article class="data-panel">
+        <div class="panel-heading">
           <span class="panel-badge">⚙</span>
           <h3>Trade Parameters</h3>
         </div>
