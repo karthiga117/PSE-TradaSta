@@ -1,15 +1,24 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { finalize, forkJoin, map, of, switchMap } from 'rxjs';
+import { finalize, forkJoin, map, switchMap } from 'rxjs';
 
-import { AiExplanationResponse, DashboardState, RiskEvaluationRequest, SignalRequestPayload } from '../../core/models/trading.models';
-import { AiExplanationService } from '../../core/services/ai-explanation.service';
-import { KnowledgeService } from '../../core/services/knowledge.service';
+import { DashboardState, HealthResponse, RiskEvaluationRequest } from '../../core/models/trading.models';
+import { ApiService } from '../../core/services/api.service';
 import { MarketDataService } from '../../core/services/market-data.service';
 import { RiskManagementService } from '../../core/services/risk-management.service';
 import { TechnicalAnalysisService } from '../../core/services/technical-analysis.service';
-import { TradingSignalService } from '../../core/services/trading-signal.service';
+
+type BackendStatus = 'CHECKING' | 'CONNECTED' | 'DISCONNECTED';
+
+type SessionSignal = {
+  symbol: string;
+  timeframe: string;
+  direction: string;
+  strategy: string;
+  time: string;
+};
 
 @Component({
   selector: 'app-dashboard',
@@ -34,43 +43,154 @@ export class DashboardComponent implements OnInit {
 
   readonly isLoading = signal(false);
   readonly errorMessage = signal<string | null>(null);
+  readonly backendStatus = signal<BackendStatus>('CHECKING');
+  readonly recentSignals = signal<SessionSignal[]>([]);
 
+  readonly chartPath = computed(() => this.buildChartPath());
+  readonly technicalIndicators = computed(() => {
+    const analysis = this.state().analysis;
+    if (!analysis) {
+      return [];
+    }
+
+    const indicators = analysis.indicators;
+    return [
+      {
+        label: 'RSI (14)',
+        value: indicators.rsi ? indicators.rsi.value : 'N/A',
+        direction: indicators.rsi ? 'Neutral' : 'N/A',
+        directionClass: 'neutral',
+      },
+      {
+        label: 'MACD',
+        value: indicators.macd ? indicators.macd.macd : 'N/A',
+        direction: indicators.macd ? (Number(indicators.macd.macd) >= 0 ? 'Bullish' : 'Bearish') : 'N/A',
+        directionClass: Number(indicators.macd?.macd ?? 0) >= 0 ? 'bullish' : 'bearish',
+      },
+      {
+        label: 'EMA (20)',
+        value: indicators.ema ? indicators.ema.value : 'N/A',
+        direction: indicators.ema ? 'Trend-based' : 'N/A',
+        directionClass: 'bullish',
+      },
+      {
+        label: 'SMA (200)',
+        value: indicators.sma ? indicators.sma.value : 'N/A',
+        direction: indicators.sma ? (analysis.trend === 'BULLISH' ? 'Bullish' : analysis.trend === 'BEARISH' ? 'Bearish' : 'Neutral') : 'N/A',
+        directionClass: analysis.trend === 'BULLISH' ? 'bullish' : analysis.trend === 'BEARISH' ? 'bearish' : 'neutral',
+      },
+      {
+        label: 'ATR (14)',
+        value: indicators.atr ? indicators.atr.value : 'N/A',
+        direction: 'N/A',
+        directionClass: 'muted',
+      },
+    ];
+  });
+
+  private readonly api = inject(ApiService);
   private readonly marketDataService = inject(MarketDataService);
   private readonly technicalAnalysisService = inject(TechnicalAnalysisService);
-  private readonly tradingSignalService = inject(TradingSignalService);
   private readonly riskManagementService = inject(RiskManagementService);
-  private readonly aiExplanationService = inject(AiExplanationService);
-  private readonly knowledgeService = inject(KnowledgeService);
 
   ngOnInit(): void {
+    this.checkBackend();
     this.loadDashboard();
   }
 
   refresh(): void {
+    this.checkBackend();
     this.loadDashboard();
   }
 
+  formatPrice(value: string | number | null | undefined): string {
+    if (value === null || value === undefined || value === '') {
+      return 'N/A';
+    }
+
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) {
+      return String(value);
+    }
+
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(numericValue);
+  }
+
+  displayedSymbol(): string {
+    return (this.symbolControl.value ?? 'BTCUSDT').trim().toUpperCase() || 'BTCUSDT';
+  }
+
+  primaryTrend(): string {
+    const trend = this.state().analysis?.trend;
+    return trend ? trend.toUpperCase() : 'N/A';
+  }
+
+  primaryStrategy(): string {
+    return this.state().analysis?.strategies[0]?.strategy_name ?? 'technical_analysis';
+  }
+
+  currentPriceValue(): string {
+    const price = this.state().price?.price;
+    return price === null || price === undefined || price === '' ? 'Loading...' : this.formatPrice(price);
+  }
+
+  riskStatusText(): string {
+    const risk = this.state().risk;
+    if (!risk) {
+      return 'Awaiting risk evaluation';
+    }
+    return risk.approved ? 'APPROVED' : 'REJECTED';
+  }
+
+  signalToneClass(): string {
+    const trend = this.primaryTrend();
+    if (trend === 'BULLISH') {
+      return 'buy';
+    }
+    if (trend === 'BEARISH') {
+      return 'sell';
+    }
+    return 'hold';
+  }
+
+  private checkBackend(): void {
+    this.backendStatus.set('CHECKING');
+    this.api.get<HealthResponse>('/api/v1/health').subscribe({
+      next: () => this.backendStatus.set('CONNECTED'),
+      error: () => this.backendStatus.set('DISCONNECTED'),
+    });
+  }
+
   private loadDashboard(): void {
-    const symbol = (this.symbolControl.value ?? 'BTCUSDT').trim();
+    const rawSymbol = (this.symbolControl.value ?? 'BTCUSDT').trim().toUpperCase();
+    const symbol = rawSymbol || 'BTCUSDT';
     const timeframe = this.timeframeControl.value ?? '1h';
 
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.marketDataService.getPrice(symbol)
+    forkJoin({
+      price: this.marketDataService.getPrice(symbol),
+      ohlcv: this.marketDataService.getOhlcv(symbol, timeframe, 24),
+      analysis: this.technicalAnalysisService.getAnalysis(symbol, timeframe, 200),
+    })
       .pipe(
-        switchMap((price) =>
-          forkJoin({
-            price: of(price),
-            ohlcv: this.marketDataService.getOhlcv(symbol, timeframe, 24),
-            analysis: this.technicalAnalysisService.getAnalysis(symbol, timeframe, 200),
-          }),
-        ),
         switchMap(({ price, ohlcv, analysis }) => {
-          const signalRequest: SignalRequestPayload = {
-            symbol,
-            timeframe,
-            strategy: analysis.strategies[0]?.strategy_name ?? 'moving_average_trend',
+          const entryPrice = Number(price.price) || 0;
+          const trend = (analysis.trend ?? 'NEUTRAL').toUpperCase();
+          const isShort = trend === 'BEARISH';
+
+          const riskRequest: RiskEvaluationRequest = {
+            symbol: symbol.replace(/USDT$/i, ''),
+            side: isShort ? 'SHORT' : 'LONG',
+            entry_price: entryPrice,
+            stop_loss: entryPrice ? (isShort ? entryPrice * 1.03 : entryPrice * 0.97) : null,
+            take_profit: entryPrice ? (isShort ? entryPrice * 0.92 : entryPrice * 1.08) : null,
             account_equity: 10000,
             current_exposure: 2000,
             daily_loss: 100,
@@ -79,57 +199,69 @@ export class DashboardComponent implements OnInit {
             open_positions: 2,
           };
 
-          return this.tradingSignalService.generateSignal(signalRequest).pipe(
-            switchMap((signal) => {
-              const riskRequest: RiskEvaluationRequest = {
-                symbol,
-                side: signal.signal === 'SELL' ? 'SHORT' : 'LONG',
-                entry_price: signal.entry ?? price.price,
-                stop_loss: signal.stop_loss ?? null,
-                take_profit: signal.take_profit ?? null,
-                account_equity: 10000,
-                current_exposure: 2000,
-                daily_loss: 100,
-                peak_equity: 10000,
-                current_equity: 9800,
-                open_positions: 2,
-              };
-
-              return this.riskManagementService.evaluate(riskRequest).pipe(
-                switchMap((risk) =>
-                  this.aiExplanationService.explainSignal(signal, symbol, timeframe).pipe(
-                    map((explanation: AiExplanationResponse) => ({
-                      price,
-                      ohlcv,
-                      analysis,
-                      signal,
-                      risk,
-                      explanation,
-                    })),
-                  ),
-                ),
-              );
-            }),
+          return this.riskManagementService.evaluate(riskRequest).pipe(
+            map((risk) => ({ price, ohlcv, analysis, risk })),
           );
         }),
-        switchMap(({ price, ohlcv, analysis, signal, risk, explanation }) =>
-          this.knowledgeService.searchKnowledge(`${symbol} ${timeframe} ${signal.strategy} ${signal.signal}`, 5).pipe(
-            map((knowledge) => ({
-              price,
-              ohlcv,
-              analysis,
-              signal,
-              risk,
-              explanation,
-              knowledge,
-            })),
-          ),
-        ),
         finalize(() => this.isLoading.set(false)),
       )
       .subscribe({
-        next: (payload) => this.state.set(payload),
-        error: (error: Error) => this.errorMessage.set(error.message),
+        next: ({ price, ohlcv, analysis, risk }) => {
+          this.state.set({
+            price,
+            ohlcv,
+            analysis,
+            signal: null,
+            risk,
+            explanation: null,
+            knowledge: null,
+          });
+
+          this.recentSignals.set([
+            {
+              symbol,
+              timeframe,
+              direction: analysis.trend,
+              strategy: this.primaryStrategy(),
+              time: 'just now',
+            },
+          ]);
+        },
+        error: (error: HttpErrorResponse) => {
+          const message = error?.error?.detail ?? error?.message ?? 'Unable to load dashboard data';
+          this.errorMessage.set(message);
+          this.state.set({
+            price: null,
+            ohlcv: null,
+            analysis: null,
+            signal: null,
+            risk: null,
+            explanation: null,
+            knowledge: null,
+          });
+          this.recentSignals.set([]);
+        },
       });
+  }
+
+  private buildChartPath(): string {
+    const candles = this.state().ohlcv?.candles ?? [];
+    if (candles.length === 0) {
+      return '';
+    }
+
+    const closes = candles.map((entry) => Number(entry.close));
+    const minValue = Math.min(...closes);
+    const maxValue = Math.max(...closes);
+    const range = maxValue - minValue || 1;
+
+    return candles
+      .map((entry, index) => {
+        const x = 32 + (index * 700) / (candles.length - 1 || 1);
+        const normalized = (Number(entry.close) - minValue) / range;
+        const y = 210 - normalized * 160;
+        return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
+      })
+      .join(' ');
   }
 }

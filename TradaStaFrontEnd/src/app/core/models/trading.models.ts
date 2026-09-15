@@ -1,3 +1,9 @@
+export interface HealthResponse {
+  status: string;
+  service: string;
+  version: string;
+}
+
 export interface MarketPriceResponse {
   symbol: string;
   price: string;
