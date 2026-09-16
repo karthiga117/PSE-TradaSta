@@ -53,6 +53,22 @@ export class DashboardComponent implements OnInit {
   readonly symbolControl = new FormControl('BTCUSDT');
   readonly timeframeControl = new FormControl('1h');
 
+  private readonly symbolAliases: Record<string, string> = {
+    BTC: 'BTCUSDT',
+    BITCOIN: 'BTCUSDT',
+    BTCUSD: 'BTCUSDT',
+    ETH: 'ETHUSDT',
+    ETHUSD: 'ETHUSDT',
+    SOL: 'SOLUSDT',
+    SOLUSD: 'SOLUSDT',
+    ADA: 'ADAUSDT',
+    ADAUSD: 'ADAUSDT',
+    XRP: 'XRPUSDT',
+    XRPUSD: 'XRPUSDT',
+    DOGE: 'DOGEUSDT',
+    DOGEUSD: 'DOGEUSDT',
+  };
+
   readonly state = signal<DashboardState>({
     price: null,
     ohlcv: null,
@@ -126,7 +142,7 @@ export class DashboardComponent implements OnInit {
   }
 
   applySelection(): void {
-    const normalizedSymbol = (this.symbolControl.value ?? '').trim().toUpperCase();
+    const normalizedSymbol = this.normalizeSymbolInput(this.symbolControl.value ?? '');
     if (!normalizedSymbol) {
       return;
     }
@@ -164,7 +180,21 @@ export class DashboardComponent implements OnInit {
   }
 
   displayedSymbol(): string {
-    return (this.symbolControl.value ?? 'BTCUSDT').trim().toUpperCase() || 'BTCUSDT';
+    return this.normalizeSymbolInput(this.symbolControl.value ?? 'BTCUSDT') || 'BTCUSDT';
+  }
+
+  assetBadge(): string {
+    const symbol = this.displayedSymbol();
+    const royalMapping: Record<string, string> = {
+      BTCUSDT: '₿',
+      ETHUSDT: 'Ξ',
+      SOLUSDT: 'S',
+      ADAUSDT: 'A',
+      XRPUSDT: 'X',
+      DOGEUSDT: 'Ð',
+    };
+
+    return royalMapping[symbol] ?? symbol.charAt(0) ?? '₿';
   }
 
   primaryTrend(): string {
@@ -200,6 +230,34 @@ export class DashboardComponent implements OnInit {
     return 'hold';
   }
 
+  private normalizeSymbolInput(symbol: string): string {
+    const raw = (symbol ?? '').trim();
+    if (!raw) {
+      return 'BTCUSDT';
+    }
+
+    const upper = raw.toUpperCase();
+    const alias = this.symbolAliases[upper] ?? this.symbolAliases[upper.replace(/[^A-Z]/g, '')];
+
+    if (alias) {
+      return alias;
+    }
+
+    if (upper.endsWith('USDT')) {
+      return upper;
+    }
+
+    if (upper.endsWith('USD')) {
+      return `${upper.slice(0, -3)}USDT`;
+    }
+
+    if (/^[A-Z0-9]{2,12}$/.test(upper)) {
+      return `${upper}USDT`;
+    }
+
+    return 'BTCUSDT';
+  }
+
   private checkBackend(): void {
     this.backendStatus.set('CHECKING');
     this.api.get<HealthResponse>('/api/v1/health').subscribe({
@@ -209,8 +267,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboard(): void {
-    const rawSymbol = (this.symbolControl.value ?? 'BTCUSDT').trim().toUpperCase();
-    const symbol = rawSymbol || 'BTCUSDT';
+    const symbol = this.displayedSymbol();
     const timeframe = this.timeframeControl.value ?? '1h';
 
     this.isLoading.set(true);

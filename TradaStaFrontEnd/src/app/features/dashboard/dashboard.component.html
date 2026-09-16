@@ -54,7 +54,7 @@
     <header class="top-header">
       <div class="control-group">
         <div class="asset-select" role="group" aria-label="Asset selector">
-          <span class="coin-icon">₿</span>
+          <span class="coin-icon" aria-label="Selected asset badge">{{ assetBadge() }}</span>
           <input [formControl]="symbolControl" aria-label="Asset symbol" type="text" value="BTCUSDT" (keydown.enter)="applySelection()" (blur)="applySelection()" />
         </div>
 
@@ -102,7 +102,7 @@
           <div class="summary-grid">
             <article class="summary-card">
               <div class="card-header">
-                <span class="card-icon card-icon--price">₿</span>
+                <span class="card-icon card-icon--price">{{ assetBadge() }}</span>
                 <span>Current Price</span>
               </div>
               <div class="card-value">{{ currentPriceValue() }}</div>

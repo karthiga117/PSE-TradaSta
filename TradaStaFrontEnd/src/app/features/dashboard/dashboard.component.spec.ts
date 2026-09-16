@@ -27,4 +27,14 @@ describe('DashboardComponent', () => {
   it('should expose the dashboard default symbol from the mockup', () => {
     expect(component.symbolControl.value).toBe('BTCUSDT');
   });
+
+  it('should normalize common asset names to a valid pair and update the badge', () => {
+    component.symbolControl.setValue('eth');
+    expect(component.displayedSymbol()).toBe('ETHUSDT');
+    expect(component.assetBadge()).toBe('Ξ');
+
+    component.symbolControl.setValue('sol');
+    expect(component.displayedSymbol()).toBe('SOLUSDT');
+    expect(component.assetBadge()).toBe('S');
+  });
 });
