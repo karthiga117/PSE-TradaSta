@@ -1,0 +1,42 @@
+<section class="screen-shell">
+  <div class="screen-header">
+    <div>
+      <h1>Trading Signals</h1>
+      <p>AI-generated trade ideas and strategy context</p>
+    </div>
+    <button type="button" class="refresh-button">Refresh</button>
+  </div>
+
+  <div class="signal-grid">
+    <article class="signal-card" *ngFor="let card of signalCards">
+      <span class="signal-label">{{ card.title }}</span>
+      <strong class="signal-value" [ngClass]="card.tone">{{ card.value }}</strong>
+    </article>
+  </div>
+
+  <article class="panel-card">
+    <div class="panel-heading">
+      <h3>Signal History</h3>
+      <button type="button" class="pill-button">View all</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Symbol</th>
+          <th>Signal</th>
+          <th>Confidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of history">
+          <td>{{ row.time }}</td>
+          <td>{{ row.symbol }}</td>
+          <td><span class="signal-badge" [ngClass]="row.signal.toLowerCase()">{{ row.signal }}</span></td>
+          <td>{{ row.confidence }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </article>
+</section>

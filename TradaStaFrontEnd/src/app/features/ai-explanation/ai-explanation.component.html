@@ -1,0 +1,35 @@
+<section class="screen-shell">
+  <div class="screen-header">
+    <div>
+      <h1>AI Explanation</h1>
+      <p>Plain-language interpretation of the current setup</p>
+    </div>
+    <button type="button" class="refresh-button">Refresh</button>
+  </div>
+
+  <div class="explanation-grid">
+    <article class="panel-card">
+      <div class="panel-heading">
+        <h3>AI Analysis</h3>
+      </div>
+      <p>
+        The current {{ symbol }} structure is being evaluated against the selected {{ timeframe }} trend and the latest market context. This output updates with the active dashboard values rather than static mock content.
+      </p>
+      <ul>
+        <li *ngFor="let point of keyPoints">{{ point }}</li>
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <div class="panel-heading">
+        <h3>Key Takeaways</h3>
+      </div>
+      <div class="tag-list">
+        <span>{{ analysis?.trend ? analysis!.trend.toUpperCase() : 'Trend pending' }}</span>
+        <span>{{ risk?.approved ? 'Risk approved' : 'Risk under review' }}</span>
+        <span>{{ knowledge?.documents?.length ? 'Context loaded' : 'Context pending' }}</span>
+        <span>{{ price?.price ? 'Live price active' : 'Awaiting price' }}</span>
+      </div>
+    </article>
+  </div>
+</section>

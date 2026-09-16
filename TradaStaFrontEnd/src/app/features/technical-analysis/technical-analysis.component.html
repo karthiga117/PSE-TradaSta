@@ -1,0 +1,57 @@
+<section class="screen-shell">
+  <div class="screen-header">
+    <div>
+      <h1>Technical Analysis</h1>
+      <p>Indicators and trend signals</p>
+    </div>
+    <button type="button" class="refresh-button">Refresh</button>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card" *ngFor="let item of summary">
+      <span class="summary-label">{{ item.label }}</span>
+      <strong>{{ item.value }}</strong>
+    </article>
+  </div>
+
+  <div class="two-column">
+    <article class="panel-card">
+      <div class="panel-heading">
+        <h3>Key Indicators</h3>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Indicator</th>
+            <th>Value</th>
+            <th>Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of indicators">
+            <td>{{ row.name }}</td>
+            <td>{{ row.value }}</td>
+            <td><span class="signal-pill" [ngClass]="row.signal.toLowerCase()">{{ row.signal }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="panel-card insights">
+      <div class="panel-heading">
+        <h3>Analysis Summary</h3>
+      </div>
+
+      <p>
+        The price is below the 20-period EMA and remains inside a weak momentum structure. Short-term volatility is elevated,
+        but the broader trend is still stabilizing near support.
+      </p>
+      <ul>
+        <li>Support zone: $74,800 – $75,300</li>
+        <li>Resistance: $78,200 – $78,800</li>
+        <li>Bias: cautious bearish</li>
+      </ul>
+    </article>
+  </div>
+</section>

@@ -15,8 +15,15 @@ import { ApiService } from '../../core/services/api.service';
 import { MarketDataService } from '../../core/services/market-data.service';
 import { RiskManagementService } from '../../core/services/risk-management.service';
 import { TechnicalAnalysisService } from '../../core/services/technical-analysis.service';
+import { AiExplanationComponent } from '../ai-explanation/ai-explanation.component';
+import { KnowledgeBaseComponent } from '../knowledge-base/knowledge-base.component';
+import { MarketDataComponent } from '../market-data/market-data.component';
+import { RiskManagementComponent } from '../risk-management/risk-management.component';
+import { TechnicalAnalysisComponent } from '../technical-analysis/technical-analysis.component';
+import { TradingSignalsComponent } from '../trading-signals/trading-signals.component';
 
 type BackendStatus = 'CHECKING' | 'CONNECTED' | 'DISCONNECTED';
+type ViewMode = 'dashboard' | 'market-data' | 'technical-analysis' | 'trading-signals' | 'risk-management' | 'ai-explanation' | 'knowledge-base';
 
 type SessionSignal = {
   symbol: string;
@@ -29,7 +36,16 @@ type SessionSignal = {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MarketDataComponent,
+    TechnicalAnalysisComponent,
+    TradingSignalsComponent,
+    RiskManagementComponent,
+    AiExplanationComponent,
+    KnowledgeBaseComponent,
+  ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
@@ -51,6 +67,7 @@ export class DashboardComponent implements OnInit {
   readonly errorMessage = signal<string | null>(null);
   readonly backendStatus = signal<BackendStatus>('CHECKING');
   readonly recentSignals = signal<SessionSignal[]>([]);
+  readonly selectedView = signal<ViewMode>('dashboard');
 
   readonly chartPath = computed(() => this.buildChartPath());
   readonly technicalIndicators = computed(() => {
@@ -102,6 +119,25 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.checkBackend();
     this.loadDashboard();
+  }
+
+  selectView(view: ViewMode): void {
+    this.selectedView.set(view);
+  }
+
+  applySelection(): void {
+    const normalizedSymbol = (this.symbolControl.value ?? '').trim().toUpperCase();
+    if (!normalizedSymbol) {
+      return;
+    }
+
+    this.symbolControl.setValue(normalizedSymbol, { emitEvent: false });
+    this.refresh();
+  }
+
+  selectTimeframe(value: string): void {
+    this.timeframeControl.setValue(value, { emitEvent: false });
+    this.refresh();
   }
 
   refresh(): void {

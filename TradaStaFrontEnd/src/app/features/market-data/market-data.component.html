@@ -1,0 +1,45 @@
+<section class="screen-shell">
+  <div class="screen-header">
+    <div>
+      <h1>Market Data</h1>
+      <p>Live and historical market data</p>
+    </div>
+    <button type="button" class="refresh-button">Refresh</button>
+  </div>
+
+  <div class="metric-grid">
+    <article class="metric-card" *ngFor="let item of marketCards">
+      <span class="metric-label">{{ item.label }}</span>
+      <strong class="metric-value">{{ item.value }}</strong>
+      <span class="metric-tone" [ngClass]="item.tone">{{ item.tone === 'up' ? 'Momentum' : item.tone === 'down' ? 'Pressure' : 'Stable' }}</span>
+    </article>
+  </div>
+
+  <div class="panel-card">
+    <div class="panel-heading">
+      <h3>Market Overview</h3>
+      <button type="button" class="pill-button">{{ timeframe }}</button>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pair</th>
+            <th>Price</th>
+            <th>Risk/Reward</th>
+            <th>Signal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of marketRows">
+            <td>{{ row.pair }}</td>
+            <td>{{ row.price }}</td>
+            <td [ngClass]="row.change === '—' ? 'neutral' : row.change.startsWith('-') ? 'down' : 'up'">{{ row.change }}</td>
+            <td><span class="signal-badge" [ngClass]="row.signal.toLowerCase()">{{ row.signal }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
