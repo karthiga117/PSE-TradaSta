@@ -3,6 +3,7 @@
 from decimal import Decimal
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +29,12 @@ class Settings(BaseSettings):
     max_open_positions: int = 5
     stop_loss_required: bool = True
     take_profit_required: bool = True
+    telegram_bot_token: str = ""
+    telegram_webhook_secret: str = ""
+    telegram_webhook_url: str | None = None
+    telegram_allowed_chat_ids: list[int] = Field(default_factory=list)
+    telegram_mode: str = "webhook"
+    telegram_api_base_url: str = "https://api.telegram.org"
 
     model_config = SettingsConfigDict(
         env_file=".env",
