@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
+from typing import Annotated, Any
 from urllib import error, request
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
@@ -17,6 +17,8 @@ from app.application.trading_analysis_service import (
     format_decimal,
     parse_telegram_command,
 )
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
 from app.core.config import Settings
 from app.core.dependencies import settings_dependency, trading_analysis_service_dependency
 
@@ -130,6 +132,7 @@ async def telegram_webhook(
     payload: dict[str, Any] | None = Body(default=None),
     settings: Settings = Depends(settings_dependency),
     analysis_service: TradingAnalysisService = Depends(trading_analysis_service_dependency),
+    current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> dict[str, bool]:
     """Validate Telegram update payloads and dispatch them through the shared application services."""
     secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token")

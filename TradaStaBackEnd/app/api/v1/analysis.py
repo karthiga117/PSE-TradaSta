@@ -10,6 +10,8 @@ from pydantic import BaseModel, ConfigDict
 
 from app.application.market_data_service import MarketDataService
 from app.application.technical_analysis.service import TechnicalAnalysisService
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
 from app.core.dependencies import market_data_service_dependency
 from app.domain.technical_analysis.models import IndicatorConfig, TechnicalAnalysisResult
 
@@ -191,6 +193,7 @@ async def get_technical_analysis(
     market_data_service: Annotated[
         MarketDataService, Depends(market_data_service_dependency)
     ],
+    current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> TechnicalAnalysisResponse:
     """Run deterministic technical indicators and return a provider-independent analysis payload."""
     candles = await market_data_service.get_ohlcv(symbol, timeframe=timeframe, limit=limit)

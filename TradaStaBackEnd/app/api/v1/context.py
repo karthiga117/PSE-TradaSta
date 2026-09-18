@@ -9,6 +9,8 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.application.knowledge.retrieval_service import SemanticRetrievalService
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
 from app.core.dependencies import context_retrieval_service_dependency
 
 router = APIRouter(tags=["context-retrieval"])
@@ -59,6 +61,7 @@ async def retrieve_context(
     retrieval_service: Annotated[
         SemanticRetrievalService, Depends(context_retrieval_service_dependency)
     ],
+    current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> ContextRetrievalResponse:
     """Return ranked local knowledge documents that are relevant to the selected market context."""
     matches = await retrieval_service.retrieve(
