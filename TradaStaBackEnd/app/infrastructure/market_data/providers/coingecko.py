@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
@@ -171,7 +172,9 @@ class CoinGeckoMarketDataProvider(IMarketDataProvider):
             interval=self._binance_interval_for(timeframe),
             limit=max(1, min(limit, 1000)),
         )
-        entries = cast(Sequence[object], payload)
+        payload_map = cast(dict[str, object], payload)
+        prices = cast(Sequence[object], payload_map.get("prices", []))
+        volumes = cast(Sequence[object], payload_map.get("total_volumes", []))
 
         candles: list[Candle] = []
         for entry in entries:
@@ -189,6 +192,7 @@ class CoinGeckoMarketDataProvider(IMarketDataProvider):
                     volume=self._parse_decimal(volume_value, "volume"),
                 )
             )
+            previous_close = close_value
 
         return candles[-limit:] if limit and candles else candles
 

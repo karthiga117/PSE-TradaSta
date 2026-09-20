@@ -1,6 +1,6 @@
 ﻿# TradaSta AI Backend
 
-TradaSta AI is a Python FastAPI backend foundation for a future-ready trading intelligence platform. The repository now includes the Phase 1 foundation and the Phase 4 deterministic technical-analysis layer, with provider-neutral market-data and analysis abstractions layered in cleanly.
+TradaSta AI is a Python FastAPI backend foundation for a future-ready trading intelligence platform. The repository now includes the Phase 1 foundation, the deterministic technical-analysis layer, the risk-management guardrail, and the Phase 6 trading-signal engine that orchestrates market data, strategy evaluation, and risk gating into explainable BUY/SELL/HOLD outputs.
 
 ## Technology stack
 
@@ -17,7 +17,10 @@ TradaSta AI is a Python FastAPI backend foundation for a future-ready trading in
 - Provider-independent market-data abstractions and a CoinGecko adapter
 - Deterministic technical-analysis engine for SMA, EMA, RSI, MACD, Bollinger Bands, ATR, and volume analysis
 - Strategy registry with deterministic sample strategies and trend classification
-- Thin FastAPI routes for price/OHLCV and technical-analysis access
+- Risk-management gate that evaluates stop loss, take profit, exposure, and drawdown constraints
+- Trading Signal Engine that returns deterministic BUY/SELL/HOLD decisions with confidence, risk/reward, and explainable reasoning
+- Phase 7 knowledge-base layer with chunking, deterministic embeddings, vector search, metadata filtering, and RAG context assembly
+- Thin FastAPI routes for price/OHLCV, technical analysis, risk evaluation, signal generation, and knowledge retrieval
 
 ## Project structure
 
@@ -108,6 +111,21 @@ uvicorn app.main:app --reload
 
 The app listens on `http://localhost:8000` by default.
 
+## Documentation
+
+The project documentation set includes:
+
+- `docs/ARCHITECTURE.md` - high-level system design and boundaries
+- `docs/API_DESIGN.md` - request/response contract and endpoint conventions
+- `docs/DATABASE_DESIGN.md` - persistence and storage strategy
+- `docs/SECURITY.md` - risk model and security controls
+- `docs/RAG_ARCHITECTURE.md` - retrieval and context assembly design
+- `docs/AI_ARCHITECTURE.md` - AI integration guardrails and architecture
+- `docs/DEPLOYMENT.md` - environment and release strategy
+- `docs/OBSERVABILITY.md` - monitoring and operational telemetry
+- `docs/TESTING.md` - validation approach and release gates
+- `docs/ADR/README.md` - architecture decision records
+
 ## API endpoints
 
 - `GET /` - service status
@@ -117,6 +135,10 @@ The app listens on `http://localhost:8000` by default.
 - `GET /api/v1/analysis/{symbol}` - deterministic technical-analysis output with indicators and strategy observations
 - `POST /api/v1/context/retrieve` - ranked local semantic context for a symbol, trend, and risk profile, serving as the Moss-inspired retrieval layer
 - `POST /api/v1/risk/evaluate` - deterministic risk gate that approves or rejects proposed trades using configured portfolio, position-size, and drawdown limits
+- `POST /api/v1/signals` - trading signal engine that combines market data, technical analysis, strategy direction, and risk validation into BUY/SELL/HOLD output
+- `POST /api/v1/knowledge/search` - semantic retrieval over the local trading knowledge base without invoking an LLM
+- `POST /api/v1/knowledge/ingest` - ingest markdown/text knowledge documents into the local vector store
+- `GET /api/v1/knowledge/context` - assemble a bounded retrieval context for future LLM orchestration
 - `GET /docs` - interactive OpenAPI docs
 
 ## Example request
@@ -130,6 +152,26 @@ The response includes:
 - `trend` classification
 - indicator values for SMA, EMA, RSI, MACD, Bollinger Bands, ATR, and volume analysis
 - strategy observations generated from the deterministic strategy registry
+
+### Signal generation example
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/signals" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "symbol": "BTCUSDT",
+    "timeframe": "1h",
+    "strategy": "moving_average_trend",
+    "account_equity": "10000",
+    "current_exposure": "2000",
+    "daily_loss": "100",
+    "peak_equity": "10000",
+    "current_equity": "9800",
+    "open_positions": 2
+  }'
+```
+
+The API returns a deterministic signal in the form `BUY`, `SELL`, or `HOLD`, with confidence, risk/reward, and a human-readable explanation. Risk validation remains mandatory before any BUY or SELL outcome is published.
 
 ## Run tests
 

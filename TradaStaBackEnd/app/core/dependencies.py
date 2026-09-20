@@ -1,12 +1,14 @@
 """Dependency injection primitives for application services."""
 
 from collections.abc import Iterator
+from functools import lru_cache
 
 from app.application.knowledge.retrieval_service import SemanticRetrievalService
 from app.application.market_data_service import MarketDataService
 from app.application.risk_management.service import RiskManagementService
 from app.application.trading_analysis_service import TradingAnalysisService
 from app.core.config import Settings, get_settings
+from app.domain.risk_management.models import RiskConfiguration
 from app.infrastructure.market_data.providers.coingecko import CoinGeckoMarketDataProvider
 
 
