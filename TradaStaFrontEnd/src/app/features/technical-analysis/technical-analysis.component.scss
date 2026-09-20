@@ -1,0 +1,138 @@
+:host {
+  display: block;
+}
+
+.screen-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.screen-header h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 2.6vw, 3rem);
+  font-weight: 800;
+}
+
+.screen-header p {
+  margin: 0.35rem 0 0;
+  color: #675d54;
+}
+
+.refresh-button {
+  border: 1px solid #e7ddd2;
+  background: #f5efe9;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card,
+.panel-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #e7ddd2;
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: #726961;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.summary-card strong {
+  font-size: 1.6rem;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 1rem;
+}
+
+.panel-heading {
+  margin-bottom: 1rem;
+}
+
+.panel-heading h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.8rem 0.6rem;
+  border-bottom: 1px solid #e7ddd2;
+}
+
+th {
+  font-size: 0.8rem;
+  color: #726961;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.signal-pill {
+  display: inline-flex;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.signal-pill.bullish,
+.signal-pill.buy {
+  background: rgba(30, 158, 97, 0.12);
+  color: #12603e;
+}
+
+.signal-pill.bearish,
+.signal-pill.sell {
+  background: rgba(209, 77, 77, 0.12);
+  color: #9b2c2c;
+}
+
+.signal-pill.neutral,
+.signal-pill.hold {
+  background: rgba(107, 114, 128, 0.12);
+  color: #374151;
+}
+
+.insights p,
+.insights li {
+  color: #524b45;
+  line-height: 1.7;
+}
+
+.insights ul {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+}

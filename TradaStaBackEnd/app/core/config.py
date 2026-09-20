@@ -3,6 +3,7 @@
 from decimal import Decimal
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +16,30 @@ class Settings(BaseSettings):
     debug: bool = False
     log_level: str = "INFO"
     api_v1_prefix: str = "/api/v1"
+    database_url: str = "sqlite:///./tradasta_auth.db"
+    auth_required_for_trading: bool = False
+    jwt_secret_key: str = "change-this-to-a-random-32-byte-secret-value"
+
+    @property
+    def require_auth_for_trading(self) -> bool:
+        """Backward-compatible alias for the trading-auth switch."""
+        return self.auth_required_for_trading
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
+    jwt_refresh_token_expire_days: int = 7
+    auth_login_rate_limit: int = 5
+    auth_login_lockout_seconds: int = 300
+    ai_request_rate_limit: int = 30
+    cors_allowed_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:4200",
+            "http://127.0.0.1:4200",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ]
+    )
     market_data_provider: str = "coingecko"
     market_data_base_url: str = "https://api.coingecko.com/api/v3"
     market_data_timeout_seconds: float = 10.0
@@ -33,10 +58,12 @@ class Settings(BaseSettings):
     max_open_positions: int = 5
     stop_loss_required: bool = True
     take_profit_required: bool = True
-    default_strategy: str = "moving_average_trend"
-    min_signal_confidence: Decimal = Decimal("0.60")
-    atr_stop_multiplier: Decimal = Decimal("2.0")
-    target_risk_reward: Decimal = Decimal("2.0")
+    telegram_bot_token: str = ""
+    telegram_webhook_secret: str = ""
+    telegram_webhook_url: str | None = None
+    telegram_allowed_chat_ids: list[int] = Field(default_factory=list)
+    telegram_mode: str = "webhook"
+    telegram_api_base_url: str = "https://api.telegram.org"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -44,6 +71,13 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="ignore",
     )
+
+    def validate_required_security_settings(self) -> None:
+        """Fail fast in production when required auth settings are missing or weak."""
+        if self.jwt_secret_key and len(self.jwt_secret_key.encode("utf-8")) < 32:
+            raise ValueError("JWT secret key must be at least 32 characters long.")
+        if self.environment.lower() == "production" and not self.jwt_secret_key:
+            raise ValueError("JWT secret key is required in production.")
 
 
 @lru_cache

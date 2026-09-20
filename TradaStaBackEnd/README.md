@@ -133,6 +133,7 @@ The project documentation set includes:
 - `GET /api/v1/market-data/{symbol}/price` - current price for a symbol
 - `GET /api/v1/market-data/{symbol}/ohlcv` - normalized OHLCV candles for a symbol and timeframe
 - `GET /api/v1/analysis/{symbol}` - deterministic technical-analysis output with indicators and strategy observations
+- `POST /api/v1/context/retrieve` - ranked local semantic context for a symbol, trend, and risk profile, serving as the Moss-inspired retrieval layer
 - `POST /api/v1/risk/evaluate` - deterministic risk gate that approves or rejects proposed trades using configured portfolio, position-size, and drawdown limits
 - `POST /api/v1/signals` - trading signal engine that combines market data, technical analysis, strategy direction, and risk validation into BUY/SELL/HOLD output
 - `POST /api/v1/knowledge/search` - semantic retrieval over the local trading knowledge base without invoking an LLM

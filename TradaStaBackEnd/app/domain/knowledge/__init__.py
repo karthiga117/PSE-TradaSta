@@ -1,25 +1,5 @@
-"""Knowledge-base domain models for the RAG layer."""
+"""Knowledge-domain models for semantic retrieval."""
 
-from app.domain.knowledge.models import (
-    IngestionResult,
-    KnowledgeCategory,
-    KnowledgeChunk,
-    KnowledgeDocument,
-    KnowledgeEmbedding,
-    KnowledgeSourceType,
-    RagContext,
-    RetrievalRequest,
-    RetrievalResult,
-)
+from app.domain.knowledge.models import RetrievalDocument, RetrievalMatch
 
-__all__ = [
-    "IngestionResult",
-    "KnowledgeCategory",
-    "KnowledgeChunk",
-    "KnowledgeDocument",
-    "KnowledgeEmbedding",
-    "KnowledgeSourceType",
-    "RagContext",
-    "RetrievalRequest",
-    "RetrievalResult",
-]
+__all__ = ["RetrievalDocument", "RetrievalMatch"]

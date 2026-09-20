@@ -1,0 +1,40 @@
+<section class="screen-shell">
+  <div class="screen-header">
+    <div>
+      <h1>Risk Management</h1>
+      <p>Portfolio-level risk assessment and trade controls</p>
+    </div>
+    <button type="button" class="refresh-button">Refresh</button>
+  </div>
+
+  <div class="metric-grid">
+    <article class="metric-card" *ngFor="let item of metrics">
+      <span class="metric-label">{{ item.label }}</span>
+      <strong>{{ item.value }}</strong>
+      <span class="metric-status" [ngClass]="item.tone">{{ item.tone === 'good' ? 'Healthy' : item.tone === 'warning' ? 'Watch' : 'Stable' }}</span>
+    </article>
+  </div>
+
+  <div class="two-column">
+    <article class="panel-card">
+      <div class="panel-heading">
+        <h3>Risk Checklist</h3>
+      </div>
+      <ul class="check-list">
+        <li *ngFor="let item of checks">{{ item }}</li>
+      </ul>
+    </article>
+
+    <article class="panel-card">
+      <div class="panel-heading">
+        <h3>Trade Parameters</h3>
+      </div>
+      <div class="parameter-list">
+        <div class="row" *ngFor="let row of tradeParameters">
+          <span>{{ row.label }}</span>
+          <strong>{{ row.value }}</strong>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

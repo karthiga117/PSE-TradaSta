@@ -1,0 +1,314 @@
+﻿<section class="dashboard-shell" aria-live="polite">
+  <aside class="sidebar">
+    <div class="brand-section">
+      <div class="brand-mark" aria-hidden="true">
+        <span class="brand-mark__bar brand-mark__bar--short"></span>
+        <span class="brand-mark__bar brand-mark__bar--tall"></span>
+        <span class="brand-mark__bar brand-mark__bar--mid"></span>
+      </div>
+      <div class="brand-copy">
+        <h2>TradaSta</h2>
+        <small>AI Trading Assistant</small>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Sidebar navigation">
+      <button class="nav-item" [class.active]="selectedView() === 'dashboard'" type="button" (click)="selectView('dashboard')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13.5h6V20H4v-6.5zm10-9.5h6V20h-6V4zm-10 0h6v6.5H4V4zm10 9.5h6v6.5h-6v-6.5z"/></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" [class.active]="selectedView() === 'market-data'" type="button" (click)="selectView('market-data')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16M7 15V9m5 6V6m5 9v-4"/></svg>
+        <span>Market Data</span>
+      </button>
+      <button class="nav-item" [class.active]="selectedView() === 'technical-analysis'" type="button" (click)="selectView('technical-analysis')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18V8m7 10V4m7 14v-8"/></svg>
+        <span>Technical Analysis</span>
+      </button>
+      <button class="nav-item" [class.active]="selectedView() === 'trading-signals'" type="button" (click)="selectView('trading-signals')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18h14M7 15l3-5 3 3 5-8"/></svg>
+        <span>Trading Signals</span>
+      </button>
+      <button class="nav-item" [class.active]="selectedView() === 'risk-management'" type="button" (click)="selectView('risk-management')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-2.9 8.6-7 10-4.1-1.4-7-5.5-7-10V7l7-4zm-1 7h2v6h-2zm0 7h2v2h-2z"/></svg>
+        <span>Risk Management</span>
+      </button>
+      <button class="nav-item" [class.active]="selectedView() === 'ai-explanation'" type="button" (click)="selectView('ai-explanation')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14c1.5-3 3.2-4.5 5.5-4.5S17 11.5 18 14v4H6v-3.5zm1.5-8h9l1.5 2.5H6l1.5-2.5z"/></svg>
+        <span>AI Explanation</span>
+      </button>
+      <button class="nav-item" [class.active]="selectedView() === 'knowledge-base'" type="button" (click)="selectView('knowledge-base')">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5A2.5 2.5 0 0 1 7.5 6h9A2.5 2.5 0 0 1 19 8.5v7A2.5 2.5 0 0 1 16.5 18h-9A2.5 2.5 0 0 1 5 15.5v-7zm2 1.5h10M8 12h8M8 15h5"/></svg>
+        <span>Knowledge Base</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-cta">
+      <div class="cta-badge">Trade Smarter</div>
+      <p>With AI Insights</p>
+      <small>Data • Analysis • Risk • Knowledge • Clarity</small>
+    </div>
+  </aside>
+
+  <main class="main-panel">
+    <header class="top-header">
+      <div class="control-group">
+        <div class="asset-select" role="group" aria-label="Asset selector">
+          <span class="coin-icon" aria-label="Selected asset badge">{{ assetBadge() }}</span>
+          <input [formControl]="symbolControl" aria-label="Asset symbol" type="text" value="BTCUSDT" (keydown.enter)="applySelection()" (blur)="applySelection()" />
+        </div>
+
+        <select class="timeframe-select" [formControl]="timeframeControl" aria-label="Timeframe selection" (change)="refresh()">
+          <option value="15m">15m</option>
+          <option value="1h">1h</option>
+          <option value="4h">4h</option>
+          <option value="1d">1d</option>
+          <option value="1w">1w</option>
+        </select>
+
+        <button type="button" class="analyze-button" (click)="applySelection()" [disabled]="isLoading()">
+          {{ isLoading() ? 'Loading...' : 'Analyze' }}
+        </button>
+      </div>
+
+      <div class="header-meta">
+        <span class="connection-pill">
+          <span class="status-dot" [ngClass]="backendStatus() === 'CONNECTED' ? 'connected' : backendStatus() === 'DISCONNECTED' ? 'disconnected' : 'checking'"></span>
+          {{ backendStatus() === 'CONNECTED' ? 'Backend Connected' : backendStatus() === 'DISCONNECTED' ? 'Backend Disconnected' : 'Checking backend...' }}
+        </span>
+        <div class="profile-pill">
+          <span class="profile-avatar">K</span>
+          <span>Karthiga</span>
+        </div>
+      </div>
+    </header>
+
+    @switch (selectedView()) {
+      @case ('dashboard') {
+        <div>
+          <div class="page-header">
+            <div>
+              <h1>Dashboard</h1>
+              <p>Market insights, technical analysis and risk context</p>
+            </div>
+            <button type="button" class="refresh-button" (click)="refresh()">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0 2.2 5.6M20 4v7h-7"/></svg>
+              Refresh
+            </button>
+          </div>
+
+          <div *ngIf="errorMessage()" class="error-banner">{{ errorMessage() }}</div>
+
+          <div class="summary-grid">
+            <article class="summary-card">
+              <div class="card-header">
+                <span class="card-icon card-icon--price">{{ assetBadge() }}</span>
+                <span>Current Price</span>
+              </div>
+              <div class="card-value">{{ currentPriceValue() }}</div>
+              <div class="card-trend positive">{{ state().price ? displayedSymbol() : 'Awaiting market data' }}</div>
+            </article>
+
+            <article class="summary-card">
+              <div class="card-header">
+                <span class="card-icon card-icon--signal">↗</span>
+                <span>Trading Signal</span>
+              </div>
+              <div class="card-signal {{ signalToneClass() }}">{{ primaryTrend() }}</div>
+              <div class="card-meta">Strategy: {{ primaryStrategy() }}</div>
+            </article>
+
+            <article class="summary-card">
+              <div class="card-header">
+                <span class="card-icon card-icon--risk">R</span>
+                <span>Risk / Reward</span>
+              </div>
+              <div class="card-value small">{{ state().risk?.risk_reward_ratio ?? 'N/A' }}</div>
+              <div class="card-meta">{{ riskStatusText() }}</div>
+            </article>
+
+            <article class="summary-card">
+              <div class="card-header">
+                <span class="card-icon card-icon--trend">↗</span>
+                <span>Market Trend</span>
+              </div>
+              <div class="card-value small">{{ primaryTrend() }}</div>
+              <div class="card-meta">{{ state().analysis?.strategies[0]?.rationale ?? 'Awaiting analysis' }}</div>
+            </article>
+          </div>
+
+          <article class="chart-card">
+            <div class="chart-header">
+              <span class="chart-title">{{ displayedSymbol() }} Price Chart</span>
+              <div class="time-range">
+                <button class="time-chip" [class.active]="timeframeControl.value === '15m'" type="button" (click)="selectTimeframe('15m')">15m</button>
+                <button class="time-chip" [class.active]="timeframeControl.value === '1h'" type="button" (click)="selectTimeframe('1h')">1h</button>
+                <button class="time-chip" [class.active]="timeframeControl.value === '4h'" type="button" (click)="selectTimeframe('4h')">4h</button>
+                <button class="time-chip" [class.active]="timeframeControl.value === '1d'" type="button" (click)="selectTimeframe('1d')">1d</button>
+                <button class="time-chip" [class.active]="timeframeControl.value === '1w'" type="button" (click)="selectTimeframe('1w')">1w</button>
+              </div>
+            </div>
+
+            <svg class="chart-svg" viewBox="0 0 760 260" preserveAspectRatio="none" aria-label="Price chart">
+              <g stroke="#d7d0c7" stroke-width="1">
+                <line x1="0" y1="30" x2="760" y2="30"/>
+                <line x1="0" y1="80" x2="760" y2="80"/>
+                <line x1="0" y1="130" x2="760" y2="130"/>
+                <line x1="0" y1="180" x2="760" y2="180"/>
+                <line x1="0" y1="230" x2="760" y2="230"/>
+              </g>
+
+              <path *ngIf="chartPath()" [attr.d]="chartPath()" fill="none" stroke="#d4b08d" stroke-width="2"></path>
+              <g *ngIf="!chartPath()" fill="#7d6d5c" font-size="11">
+                <text x="280" y="130">Loading market data...</text>
+              </g>
+            </svg>
+          </article>
+
+          <div class="bottom-grid">
+            <article class="data-panel">
+              <div class="panel-heading">
+                <span class="panel-badge">⏱</span>
+                <h3>Technical Indicators</h3>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Indicator</th>
+                    <th>Value</th>
+                    <th>Signal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let indicator of technicalIndicators()">
+                    <td>{{ indicator.label }}</td>
+                    <td>{{ indicator.value }}</td>
+                    <td [class]="indicator.directionClass">{{ indicator.direction }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </article>
+
+            <article class="data-panel">
+              <div class="panel-heading">
+                <span class="panel-badge">🧠</span>
+                <h3>Context / Evidence</h3>
+              </div>
+
+              <div *ngIf="state().knowledge?.documents?.length; else noKnowledge" class="context-list">
+                <div class="context-item" *ngFor="let document of state().knowledge!.documents">
+                  <div class="context-head">
+                    <span class="context-tag">{{ document.category }}</span>
+                    <strong>{{ document.title }}</strong>
+                    <span class="context-score">{{ document.score.toFixed(2) }}</span>
+                  </div>
+                  <p>{{ document.summary }}</p>
+                  <div class="context-tags" *ngIf="document.tags?.length">
+                    <span *ngFor="let tag of document.tags">{{ tag }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #noKnowledge>
+                <div class="empty-state">Retrieval context is loading...</div>
+              </ng-template>
+            </article>
+
+            <article class="data-panel">
+              <div class="panel-heading">
+                <span class="panel-badge">⚙</span>
+                <h3>Trade Parameters</h3>
+              </div>
+
+              <div class="parameter-layout">
+                <div class="parameter-row"><span>Entry Price</span><strong>{{ state().price?.price ? formatPrice(state().price?.price) : 'N/A' }}</strong></div>
+                <div class="parameter-row"><span>Stop Loss</span><strong>{{ state().risk?.approved ? 'Provided by risk model' : 'N/A' }}</strong></div>
+                <div class="parameter-row"><span>Take Profit</span><strong>{{ state().risk?.approved ? 'Provided by risk model' : 'N/A' }}</strong></div>
+                <div class="parameter-row"><span>Risk / Reward</span><strong>{{ state().risk?.risk_reward_ratio ?? 'N/A' }}</strong></div>
+                <div class="parameter-row"><span>Position Size</span><strong>{{ state().risk?.position_size ?? 'N/A' }}</strong></div>
+                <div class="parameter-row"><span>Risk Amount</span><strong>{{ state().risk?.risk_amount ?? 'N/A' }}</strong></div>
+              </div>
+            </article>
+
+            <article class="data-panel signal-panel">
+              <div class="panel-heading panel-heading--with-action">
+                <div class="panel-head-left">
+                  <span class="panel-badge">✦</span>
+                  <h3>Recent Signals</h3>
+                </div>
+                <button type="button" class="view-all">Session only</button>
+              </div>
+
+              <div class="signal-list">
+                <div class="signal-row" *ngIf="recentSignals().length === 0">
+                  <span class="signal-pair">No session signal yet</span>
+                </div>
+                <ng-container *ngFor="let signal of recentSignals()">
+                  <div class="signal-row">
+                    <span class="signal-mark signal-mark--btc">{{ signal.symbol.charAt(0) }}</span>
+                    <span class="signal-pair">{{ signal.symbol }}</span>
+                    <span class="signal-kind {{ signalToneClass() }}">{{ signal.direction }}</span>
+                    <span class="signal-time">{{ signal.time }}</span>
+                  </div>
+                </ng-container>
+              </div>
+            </article>
+          </div>
+        </div>
+      }
+      @case ('market-data') {
+        <app-market-data
+          [symbol]="displayedSymbol()"
+          [timeframe]="timeframeControl.value ?? '1h'"
+          [price]="state().price"
+          [analysis]="state().analysis"
+          [risk]="state().risk">
+        </app-market-data>
+      }
+      @case ('technical-analysis') {
+        <app-technical-analysis
+          [symbol]="displayedSymbol()"
+          [timeframe]="timeframeControl.value ?? '1h'"
+          [analysis]="state().analysis"
+          [price]="state().price">
+        </app-technical-analysis>
+      }
+      @case ('trading-signals') {
+        <app-trading-signals
+          [symbol]="displayedSymbol()"
+          [timeframe]="timeframeControl.value ?? '1h'"
+          [price]="state().price"
+          [analysis]="state().analysis"
+          [risk]="state().risk">
+        </app-trading-signals>
+      }
+      @case ('risk-management') {
+        <app-risk-management
+          [symbol]="displayedSymbol()"
+          [timeframe]="timeframeControl.value ?? '1h'"
+          [price]="state().price"
+          [analysis]="state().analysis"
+          [risk]="state().risk">
+        </app-risk-management>
+      }
+      @case ('ai-explanation') {
+        <app-ai-explanation
+          [symbol]="displayedSymbol()"
+          [timeframe]="timeframeControl.value ?? '1h'"
+          [price]="state().price"
+          [analysis]="state().analysis"
+          [risk]="state().risk"
+          [knowledge]="state().knowledge">
+        </app-ai-explanation>
+      }
+      @case ('knowledge-base') {
+        <app-knowledge-base
+          [symbol]="displayedSymbol()"
+          [timeframe]="timeframeControl.value ?? '1h'"
+          [knowledge]="state().knowledge">
+        </app-knowledge-base>
+      }
+    }
+  </main>
+</section>

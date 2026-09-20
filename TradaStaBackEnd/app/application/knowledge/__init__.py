@@ -1,17 +1,5 @@
-"""Application layer for RAG knowledge ingestion and retrieval."""
+"""Knowledge-layer application services."""
 
-from app.application.knowledge.context_builder import RagContextBuilder
-from app.application.knowledge.embedding import DeterministicEmbeddingProvider, EmbeddingProvider
-from app.application.knowledge.ingestion import KnowledgeIngestionService
-from app.application.knowledge.retriever import KnowledgeRetriever
-from app.application.knowledge.vector_store import InMemoryVectorStore, VectorStore
+from app.application.knowledge.retrieval_service import SemanticRetrievalService
 
-__all__ = [
-    "DeterministicEmbeddingProvider",
-    "EmbeddingProvider",
-    "InMemoryVectorStore",
-    "KnowledgeIngestionService",
-    "KnowledgeRetriever",
-    "RagContextBuilder",
-    "VectorStore",
-]
+__all__ = ["SemanticRetrievalService"]
