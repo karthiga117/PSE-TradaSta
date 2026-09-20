@@ -1,0 +1,92 @@
+:host {
+  display: block;
+}
+
+.screen-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.screen-header h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 2.6vw, 3rem);
+  font-weight: 800;
+}
+
+.screen-header p {
+  margin: 0.35rem 0 0;
+  color: #675d54;
+}
+
+.refresh-button,
+.search-panel button {
+  border: 1px solid #e7ddd2;
+  background: #f5efe9;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.search-panel {
+  display: flex;
+  gap: 0.75rem;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #e7ddd2;
+  border-radius: 18px;
+  padding: 0.75rem 1rem;
+}
+
+.search-panel input {
+  flex: 1;
+  border: 1px solid #e7ddd2;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font: inherit;
+  background: #fff;
+}
+
+.article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.article-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #e7ddd2;
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+}
+
+.article-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 0.7rem;
+}
+
+.article-head h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.article-head span {
+  color: #6a4e2d;
+  font-weight: 700;
+}
+
+.article-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: #4b463f;
+}

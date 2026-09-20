@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.screen-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.screen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.screen-header h1 {
+  margin: 0;
+  font-size: clamp(2.1rem, 2.6vw, 3rem);
+  font-weight: 800;
+}
+
+.screen-header p {
+  margin: 0.35rem 0 0;
+  color: #675d54;
+}
+
+.refresh-button {
+  border: 1px solid #e7ddd2;
+  background: #f5efe9;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card,
+.panel-card {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid #e7ddd2;
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #726961;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.metric-card strong {
+  font-size: 1.8rem;
+}
+
+.metric-status {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.metric-status.good {
+  color: #12603e;
+}
+
+.metric-status.warning {
+  color: #a75622;
+}
+
+.metric-status.neutral {
+  color: #4b5563;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1rem;
+}
+
+.panel-heading h3 {
+  margin: 0 0 1rem;
+  font-size: 1.4rem;
+}
+
+.check-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  line-height: 2;
+  color: #4b463f;
+}
+
+.parameter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e7ddd2;
+}
+
+.row span {
+  color: #726961;
+}

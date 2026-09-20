@@ -9,6 +9,8 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict
 
 from app.application.risk_management.service import RiskManagementService
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
 from app.domain.risk_management.models import RiskDecision, RiskRequest
 
 router = APIRouter(tags=["risk-management"])
@@ -82,6 +84,7 @@ class RiskDecisionResponse(BaseModel):
 async def evaluate_risk(
     payload: RiskEvaluationRequest,
     risk_service: Annotated[RiskManagementService, Depends(lambda: RiskManagementService())],
+    current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> RiskDecisionResponse:
     """Accept a trade proposal and return a deterministic risk verdict."""
     request = RiskRequest.from_mapping(payload.model_dump())

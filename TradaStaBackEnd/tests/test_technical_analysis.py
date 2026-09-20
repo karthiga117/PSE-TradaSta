@@ -137,3 +137,26 @@ async def test_market_data_endpoint_works() -> None:
     assert ohlcv_response.status_code == 200
     assert price_response.json()["symbol"] == "BTC"
     assert len(ohlcv_response.json()["candles"]) == 5
+
+
+@pytest.mark.asyncio
+async def test_context_retrieval_endpoint_works() -> None:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/context/retrieve",
+            json={
+                "symbol": "BTC",
+                "timeframe": "1h",
+                "trend": "BULLISH",
+                "risk_profile": "balanced",
+                "intent": "evaluate_trade",
+                "limit": 3,
+            },
+        )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["symbol"] == "BTC"
+    assert payload["trend"] == "BULLISH"
+    assert len(payload["documents"]) >= 1
+    assert payload["documents"][0]["title"]

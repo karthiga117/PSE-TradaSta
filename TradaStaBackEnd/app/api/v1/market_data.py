@@ -9,6 +9,8 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict
 
 from app.application.market_data_service import MarketDataService
+from app.auth.dependencies import get_current_user
+from app.auth.models import User
 from app.core.dependencies import market_data_service_dependency
 from app.domain.market_data import Candle
 
@@ -68,6 +70,7 @@ async def get_market_price(
     market_data_service: Annotated[
         MarketDataService, Depends(market_data_service_dependency)
     ],
+    current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> MarketPriceResponse:
     """Return the latest market price for a symbol without provider-specific models."""
     price = await market_data_service.get_current_price(symbol)
@@ -88,6 +91,7 @@ async def get_market_ohlcv(
     market_data_service: Annotated[
         MarketDataService, Depends(market_data_service_dependency)
     ],
+    current_user: Annotated[User | None, Depends(get_current_user)] = None,
 ) -> MarketOHLCVResponse:
     """Return a normalized OHLCV series for the requested symbol and timeframe."""
     candles = await market_data_service.get_ohlcv(symbol, timeframe=timeframe, limit=limit)
